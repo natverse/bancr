@@ -39,7 +39,7 @@ turn defines one or more R options containing URIs pointing to
 voxel-wise segmentation, mesh etc data. These are normally contained
 within a single neuroglancer URL which points to multiple data layers.
 For banc this is the neuroglancer scene returned by
-[`banc_scene`](https://flyconnectome.github.io/bancr/reference/banc_scene.md).
+[`banc_scene`](https://natverse.github.io/bancr/reference/banc_scene.md).
 
 ## Examples
 

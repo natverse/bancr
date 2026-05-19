@@ -69,9 +69,9 @@ computation, and behavior-centric neural modules.
 
 ## See also
 
-[`banc_codex_network`](https://flyconnectome.github.io/bancr/reference/banc_codex_network.md)
+[`banc_codex_network`](https://natverse.github.io/bancr/reference/banc_codex_network.md)
 for generating network visualization URLs,
-[`banc_codex_annotations`](https://flyconnectome.github.io/bancr/reference/banc_codex_annotations.md)
+[`banc_codex_annotations`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md)
 for programmatic metadata access
 
 ## Examples

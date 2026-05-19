@@ -91,7 +91,7 @@ banc_version()
 
   Character vector specifying one or more BANC rootids. As a convenience
   this argument is passed to
-  [`banc_ids`](https://flyconnectome.github.io/bancr/reference/banc_ids.md)
+  [`banc_ids`](https://natverse.github.io/bancr/reference/banc_ids.md)
   allowing you to pass in data.frames, BANC URLs or simple ids.
 
 - table:

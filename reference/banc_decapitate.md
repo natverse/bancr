@@ -60,7 +60,7 @@ BANC.
 
 ## See also
 
-[`banc.surf`](https://flyconnectome.github.io/bancr/reference/banc.surf.md)
+[`banc.surf`](https://natverse.github.io/bancr/reference/banc.surf.md)
 
 ## Examples
 

@@ -90,8 +90,8 @@ GB gzipped for v2). The 15 columns are, in order: `id`, `pre_x`,
 
 ## See also
 
-[`banc_partner_summary`](https://flyconnectome.github.io/bancr/reference/banc_partner_summary.md),
-[`banc_partners`](https://flyconnectome.github.io/bancr/reference/banc_partner_summary.md)
+[`banc_partner_summary`](https://natverse.github.io/bancr/reference/banc_partner_summary.md),
+[`banc_partners`](https://natverse.github.io/bancr/reference/banc_partner_summary.md)
 
 ## Examples
 

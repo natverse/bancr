@@ -43,12 +43,12 @@ A vector of root ids (by default character)
 [`flywire_rootid`](https://rdrr.io/pkg/fafbseg/man/flywire_rootid.html)
 
 Other banc-ids:
-[`banc_cellid_from_segid()`](https://flyconnectome.github.io/bancr/reference/banc_cellid_from_segid.md),
-[`banc_ids()`](https://flyconnectome.github.io/bancr/reference/banc_ids.md),
-[`banc_islatest()`](https://flyconnectome.github.io/bancr/reference/banc_islatest.md),
-[`banc_latestid()`](https://flyconnectome.github.io/bancr/reference/banc_latestid.md),
-[`banc_leaves()`](https://flyconnectome.github.io/bancr/reference/banc_leaves.md),
-[`banc_xyz2id()`](https://flyconnectome.github.io/bancr/reference/banc_xyz2id.md)
+[`banc_cellid_from_segid()`](https://natverse.github.io/bancr/reference/banc_cellid_from_segid.md),
+[`banc_ids()`](https://natverse.github.io/bancr/reference/banc_ids.md),
+[`banc_islatest()`](https://natverse.github.io/bancr/reference/banc_islatest.md),
+[`banc_latestid()`](https://natverse.github.io/bancr/reference/banc_latestid.md),
+[`banc_leaves()`](https://natverse.github.io/bancr/reference/banc_leaves.md),
+[`banc_xyz2id()`](https://natverse.github.io/bancr/reference/banc_xyz2id.md)
 
 ## Examples
 

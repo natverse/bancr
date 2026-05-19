@@ -28,7 +28,7 @@ cosine similarity.
 ## See also
 
 Other coconatfly:
-[`banc_meta_create_cache()`](https://flyconnectome.github.io/bancr/reference/banc_meta_create_cache.md)
+[`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md)
 
 ## Examples
 

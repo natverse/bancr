@@ -2,7 +2,7 @@
 
 Returns results from the in-memory cache, filtered by `ids` if given.
 Cache must be created first using
-[`banc_meta_create_cache()`](https://flyconnectome.github.io/bancr/reference/banc_meta_create_cache.md).
+[`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md).
 
 ## Usage
 
@@ -27,7 +27,7 @@ filters the meta table by root_id.
 
 ## See also
 
-[`banc_meta_create_cache()`](https://flyconnectome.github.io/bancr/reference/banc_meta_create_cache.md)
+[`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md)
 
 ## Examples
 

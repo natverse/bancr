@@ -1,6 +1,6 @@
 [![natverse](https://img.shields.io/badge/natverse-Part%20of%20the%20natverse-a241b6)](https://natverse.github.io)
-[![Docs](https://img.shields.io/badge/docs-100%25-brightgreen.svg)](https://flyconnectome.github.io/bancr/reference/)
-[![R-CMD-check](https://github.com/flyconnectome/bancr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/flyconnectome/bancr/actions/workflows/R-CMD-check.yaml)
+[![Docs](https://img.shields.io/badge/docs-100%25-brightgreen.svg)](https://natverse.github.io/bancr/reference/)
+[![R-CMD-check](https://github.com/natverse/bancr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/natverse/bancr/actions/workflows/R-CMD-check.yaml)
 bancr ![](reference/figures/logo.png) ===========
 
 The **bancr** package provides R access to the first unified
@@ -92,7 +92,7 @@ neuron classification:
 
 ### Centralised Annotations
 
-**[`banc_codex_annotations()`](https://flyconnectome.github.io/bancr/reference/banc_codex_annotations.md)**
+**[`banc_codex_annotations()`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md)**
 provides access to standardised cell type annotations curated by the
 BANC core team. These official classifications are: - Displayed on
 [FlyWireCodex](https://codex.flywire.ai/?dataset=banc) - Standardised
@@ -102,7 +102,7 @@ analyses
 
 ### Community Annotations
 
-**[`banc_cell_info()`](https://flyconnectome.github.io/bancr/reference/banc_cave_tables.md)**
+**[`banc_cell_info()`](https://natverse.github.io/bancr/reference/banc_cave_tables.md)**
 accesses non-centralised annotations from the broader research
 community. These annotations: - Represent diverse contributions from
 researchers studying specific circuits - Provide specialized knowledge
@@ -133,7 +133,7 @@ structure:
 | **super_class** | Coarse functional division | `ascending`, `descending`, `motor`, `sensory` | 13 |
 | **cell_class** | Anatomical/functional types | `olfactory_receptor_neuron`, `antennal_lobe_projection_neuron` | 106 |
 | **cell_sub_class** | Specific neural subtypes | `antenna_olfactory_receptor_neuron`, `multiglomerular_projection_neuron` | 176 |
-| **cell_type** | Individual neuron names | `ORN_DM6`, `ORN_VA1v`, `DNge110` | X |
+| **cell_type** | Individual neuron names | `ORN_DM6`, `ORN_VA1v`, `DNge110` | many |
 
 ### Key Annotation Categories
 
@@ -172,9 +172,11 @@ integration** with other *Drosophila* connectomes (FAFB, MANC) -
 **Multi-modal characterisation** combining anatomy, function, and
 molecular properties
 
-For the complete annotation taxonomy with all (except all cell_type)
-terms and detailed descriptions, see
-[`data-raw/banc_codex_annotations_system.md`](https://flyconnectome.github.io/bancr/data-raw/banc_codex_annotations_system.md).
+For the complete annotation taxonomy and detailed term descriptions, see
+the BANC paper supplementary materials ([Bates et
+al. 2025](https://doi.org/10.1101/2025.07.31.667571)) and the [BANC
+community
+wiki](https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/).
 
 ## Access and Setup
 
@@ -211,7 +213,7 @@ You can install the development version of `bancr` from github:
 
 ``` r
 
-remotes::install_github('flyconnectome/bancr')
+remotes::install_github('natverse/bancr')
 ```
 
 To do anything useful with the bancr package, you need authorisation to
@@ -264,10 +266,10 @@ fafbseg::simple_python('none', pkgs='caveclient~=8.0.0')
 ```
 
 Use
-[`with_banc()`](https://flyconnectome.github.io/bancr/reference/choose_banc.md)
+[`with_banc()`](https://natverse.github.io/bancr/reference/choose_banc.md)
 to wrap many additional `fafbseg::flywire_*` functions for use with the
 *BANC*. Alternatively
-[`choose_banc()`](https://flyconnectome.github.io/bancr/reference/choose_banc.md)
+[`choose_banc()`](https://natverse.github.io/bancr/reference/choose_banc.md)
 to set all `flywire_*` functions from `fafbseg` to target the *BANC*.
 Not all functions will work.
 
@@ -278,7 +280,7 @@ dependencies are updated:
 
 ``` r
 
-remotes::install_github('flyconnectome/bancr')
+remotes::install_github('natverse/bancr')
 ```
 
 If you need to update a specific Python library dependent, you can do:
@@ -416,7 +418,7 @@ plot3d(an1.left.nucleus, col = "black", alpha = 1, add = TRUE)
 plot3d(an1.right.nucleus, col = "black", alpha = 1, add = TRUE)
 ```
 
-![banc_an1](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_an1.png?raw=true)
+![banc_an1](https://github.com/natverse/bancr/blob/main/inst/images/banc_an1.png?raw=true)
 
 banc_an1
 
@@ -445,7 +447,7 @@ banc_neuron_comparison_plot(neuron1 = an1.left.mesh.simp,
 # when filename = NULL.
 ```
 
-![banc_an_comparison_ggplot2](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_an_comparison_ggplot2.png?raw=true)
+![banc_an_comparison_ggplot2](https://github.com/natverse/bancr/blob/main/inst/images/banc_an_comparison_ggplot2.png?raw=true)
 
 banc_an_comparison_ggplot2
 
@@ -457,7 +459,7 @@ Using a bridge to the symmetric ‘template brain’ (see below), we can
 Here we can see the normal (grey) and mirrored mesh (green). At the
 moment, this works less well in the VNC than the brain.
 
-![banc_neuropil_mirrored](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_neuropil_mirrored.png?raw=true)
+![banc_neuropil_mirrored](https://github.com/natverse/bancr/blob/main/inst/images/banc_neuropil_mirrored.png?raw=true)
 
 banc_neuropil_mirrored
 
@@ -486,7 +488,7 @@ plot3d(an1.left.skel.m, col = "darkred", alpha = 1)
 plot3d(an1.right.skel.m, col = "darkgreen", alpha = 1)
 ```
 
-![banc_ans_mirrored](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_ans_mirrored.png?raw=true)
+![banc_ans_mirrored](https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored.png?raw=true)
 
 banc_ans_mirrored
 
@@ -497,7 +499,7 @@ We can also change the view to see, for example, the brain more clearly.
 banc_front_view()
 ```
 
-![banc_ans_mirrored_brain](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_ans_mirrored_brain.png?raw=true)
+![banc_ans_mirrored_brain](https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored_brain.png?raw=true)
 
 banc_ans_mirrored_brain
 
@@ -508,7 +510,7 @@ Or the ventral nerve cord.
 banc_vnc_view()
 ```
 
-![banc_ans_mirrored_vnc](https://github.com/flyconnectome/bancr/blob/main/inst/images/banc_ans_mirrored_vnc.png?raw=true)
+![banc_ans_mirrored_vnc](https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored_vnc.png?raw=true)
 
 banc_ans_mirrored_vnc
 
@@ -549,7 +551,7 @@ plot3d(JRC2018F.surf, col = "lightgrey", alpha = 0.1)
 plot3d(an1.mesh.simp.brain.jrc2018f, col = c("turquoise", "navy"), alpha = 0.75, add = TRUE)
 ```
 
-![an_banc_jrc2018f](https://github.com/flyconnectome/bancr/blob/main/inst/images/an_banc_jrc2018f.png?raw=true)
+![an_banc_jrc2018f](https://github.com/natverse/bancr/blob/main/inst/images/an_banc_jrc2018f.png?raw=true)
 
 an_banc_jrc2018f
 
@@ -593,7 +595,7 @@ reference = "JRC2018F")
 plot3d(fw.an1.meshes.jrc2018f, col = c("red","orange"), alpha = 1, add = TRUE)
 ```
 
-![an_banc_fafb](https://github.com/flyconnectome/bancr/blob/main/inst/images/an_banc_fafb.png?raw=true)
+![an_banc_fafb](https://github.com/natverse/bancr/blob/main/inst/images/an_banc_fafb.png?raw=true)
 
 an_banc_fafb
 
@@ -604,7 +606,7 @@ We need to load a new R package first.
 ``` r
 
 if (!requireNamespace("remotes")) install.packages("remotes")
-remotes::install_github('flyconnectome/hemibrainr')
+remotes::install_github('natverse/hemibrainr')
 
 library(hemibrainr)
 ```
@@ -626,7 +628,7 @@ hb.an1.mesh.jrc2018f <- xform_brain(hb.an1.mesh/1000, sample = "JRCFIB2018F", re
 plot3d(hb.an1.mesh.jrc2018f , col = c("chartreuse"), alpha = 1, add = TRUE)
 ```
 
-![an_banc_fafb_hemibrain](https://github.com/flyconnectome/bancr/blob/main/inst/images/an_banc_fafb_hemibrain.png?raw=true)
+![an_banc_fafb_hemibrain](https://github.com/natverse/bancr/blob/main/inst/images/an_banc_fafb_hemibrain.png?raw=true)
 
 an_banc_fafb_hemibrain
 
@@ -694,19 +696,20 @@ ggplot(combined_data, aes(x = weight, fill = source)) +
 
 BANC data needs to be acknowledged in accordance to the [BANC community
 guidelines](https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/)
-and in agreement with the BANC consortium. If you use this package, you
-should cite the eventual BANC paper as well (TBD) as our *natverse*
-paper [(Bates et al. 2020)](https://elifesciences.org/articles/53350)
-and the R package as follows:
+and in agreement with the BANC consortium. If you use this package,
+please cite the BANC paper [(Bates et
+al. 2025)](https://doi.org/10.1101/2025.07.31.667571) and our *natverse*
+paper [(Bates et al. 2020)](https://elifesciences.org/articles/53350) in
+addition to the R package itself:
 
 ``` r
 
 citation(package = "bancr")
 ```
 
-**Bates A, Jefferis G** (2024). *bancr: R Client Access to the Brain And
-Nerve Cord (BANC) Dataset*. R package version 0.1.0,
-<https://github.com/flyconnectome/bancr>.
+**Bates A, Jefferis G** (2025). *bancr: R Client Access to the Brain And
+Nerve Cord (BANC) Dataset*. R package version 0.3.0,
+<https://github.com/natverse/bancr>.
 
 ## Acknowledgements
 
@@ -723,6 +726,11 @@ Wilson at Harvard Medical School.
 
 ## References
 
+**Bates, Alexander Shakeel, Jasper S. Phelps, Minsu Kim, Han S. J. Yang,
+Arie Matsliah, Zaki Ajabi, Eric Perlman, et al.** 2025. *Distributed
+Control Circuits across a Brain-and-Cord Connectome.* bioRxiv
+2025.07.31.667571. <https://doi.org/10.1101/2025.07.31.667571>.
+
 **Bates, Alexander Shakeel, James D. Manton, Sridhar R. Jagannathan,
 Marta Costa, Philipp Schlegel, Torsten Rohlfing, and Gregory SXE
 Jefferis**. 2020. *The Natverse, a Versatile Toolbox for Combining and
@@ -738,4 +746,4 @@ connectome”) and its Harvard Dataverse data deposit are released under
 the [Creative Commons Attribution 4.0 International License (CC BY
 4.0)](https://creativecommons.org/licenses/by/4.0/). This source code
 remains under its existing OSI-approved open-source license — see
-[`LICENSE.md`](https://flyconnectome.github.io/bancr/LICENSE.md).
+[`LICENSE.md`](https://natverse.github.io/bancr/LICENSE.md).

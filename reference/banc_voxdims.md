@@ -19,7 +19,7 @@ banc_raw2nm(x, vd = banc_voxdims())
 
   Optional neuroglancer URL containing voxel size. Defaults to
   `getOption("fafbseg.sampleurl")` as set by
-  [`choose_banc`](https://flyconnectome.github.io/bancr/reference/choose_banc.md).
+  [`choose_banc`](https://natverse.github.io/bancr/reference/choose_banc.md).
 
 - x:
 

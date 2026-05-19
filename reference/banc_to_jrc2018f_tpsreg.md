@@ -70,7 +70,7 @@ in the BANC space to its corresponding location in the JRC2018F space.
 
 ## See also
 
-[`banc_to_JRC2018F`](https://flyconnectome.github.io/bancr/reference/banc_to_JRC2018F.md)
+[`banc_to_JRC2018F`](https://natverse.github.io/bancr/reference/banc_to_JRC2018F.md)
 for the function that performs transformations between BANC and JRC2018F
 spaces.
 [`computeTransform`](https://rdrr.io/pkg/Morpho/man/computeTransform.html)

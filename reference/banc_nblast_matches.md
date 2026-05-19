@@ -53,7 +53,7 @@ banc_nblast_matches(
 - ...:
 
   Additional arguments passed to
-  [`banc_cave_query`](https://flyconnectome.github.io/bancr/reference/banc_cave_query.md),
+  [`banc_cave_query`](https://natverse.github.io/bancr/reference/banc_cave_query.md),
   including `live` (default `TRUE`; set to `2` for real-time results or
   `FALSE` for the latest materialised version).
 
@@ -117,9 +117,9 @@ need re-running (the neuron was edited after the NBLAST).
 
 ## See also
 
-[`banc_cave_query`](https://flyconnectome.github.io/bancr/reference/banc_cave_query.md)
+[`banc_cave_query`](https://natverse.github.io/bancr/reference/banc_cave_query.md)
 for the underlying CAVE query function,
-[`banc_cave_tables`](https://flyconnectome.github.io/bancr/reference/banc_cave_tables.md)
+[`banc_cave_tables`](https://natverse.github.io/bancr/reference/banc_cave_tables.md)
 for listing all available CAVE tables.
 
 ## Examples

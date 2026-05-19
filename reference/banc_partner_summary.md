@@ -38,7 +38,7 @@ banc_partners(
 
   Character vector specifying one or more BANC rootids. As a convenience
   this argument is passed to
-  [`banc_ids`](https://flyconnectome.github.io/bancr/reference/banc_ids.md)
+  [`banc_ids`](https://natverse.github.io/bancr/reference/banc_ids.md)
   allowing you to pass in data.frames, BANC URLs or simple ids.
 
 - partners:
@@ -96,7 +96,7 @@ note that the rootids you pass in must be up to date. See example.
 ## See also
 
 [`flywire_partner_summary`](https://rdrr.io/pkg/fafbseg/man/flywire_partners.html),
-[`banc_latestid`](https://flyconnectome.github.io/bancr/reference/banc_latestid.md)
+[`banc_latestid`](https://natverse.github.io/bancr/reference/banc_latestid.md)
 
 ## Examples
 

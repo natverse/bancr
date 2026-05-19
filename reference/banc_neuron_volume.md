@@ -49,7 +49,7 @@ CAVE edit, so results reflect the current segmentation state.
 
 ## See also
 
-[`banc_read_l2skel`](https://flyconnectome.github.io/bancr/reference/banc_read_l2dp.md)
+[`banc_read_l2skel`](https://natverse.github.io/bancr/reference/banc_read_l2dp.md)
 for L2 skeleton data
 
 ## Examples

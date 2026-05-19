@@ -12,7 +12,7 @@ stable shareable index.
 
 For ad-hoc / interactive use, prefer `bancr:::banc_lm_volumes()` (the
 live registry browser) +
-[`banc_lm_scene`](https://flyconnectome.github.io/bancr/reference/banc_lm_scene.md)
+[`banc_lm_scene`](https://natverse.github.io/bancr/reference/banc_lm_scene.md)
 (mints a fresh URL with custom render settings); `banc_lm_links` is the
 canned snapshot for sharing or scripting.
 

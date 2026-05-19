@@ -37,7 +37,7 @@ a mesh3d object for the specified mesh.
 
 ## See also
 
-[`banc_read_neuron_meshes`](https://flyconnectome.github.io/bancr/reference/banc_read_neuron_meshes.md)
+[`banc_read_neuron_meshes`](https://natverse.github.io/bancr/reference/banc_read_neuron_meshes.md)
 
 ## Examples
 

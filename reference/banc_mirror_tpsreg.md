@@ -59,9 +59,9 @@ counterpart, accounting for any asymmetries in the BANC reference brain.
 
 ## See also
 
-[`banc_mirror`](https://flyconnectome.github.io/bancr/reference/banc_mirror.md)
+[`banc_mirror`](https://natverse.github.io/bancr/reference/banc_mirror.md)
 for the function that performs mirroring of points in BANC space.
-[`banc_to_jrc2018f_tpsreg`](https://flyconnectome.github.io/bancr/reference/banc_to_jrc2018f_tpsreg.md)
+[`banc_to_jrc2018f_tpsreg`](https://natverse.github.io/bancr/reference/banc_to_jrc2018f_tpsreg.md)
 for the TPS registration between BANC and JRC2018F spaces.
 [`computeTransform`](https://rdrr.io/pkg/Morpho/man/computeTransform.html)
 for details on creating tpsCoeff objects.

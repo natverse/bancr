@@ -69,7 +69,7 @@ system transformations.
 
 ## See also
 
-[`banc_to_JRC2018F`](https://flyconnectome.github.io/bancr/reference/banc_to_JRC2018F.md)
+[`banc_to_JRC2018F`](https://natverse.github.io/bancr/reference/banc_to_JRC2018F.md)
 for the underlying transformation function.
 [`mirror_brain`](https://natverse.org/nat.templatebrains/reference/mirror_brain.html)
 for the mirroring operation in JRC2018F space.

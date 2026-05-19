@@ -75,9 +75,9 @@ neural computation.
 
 ## See also
 
-[`banc_codex_search`](https://flyconnectome.github.io/bancr/reference/banc_codex_search.md)
+[`banc_codex_search`](https://natverse.github.io/bancr/reference/banc_codex_search.md)
 for generating search URLs,
-[`banc_edgelist`](https://flyconnectome.github.io/bancr/reference/banc_cave_tables.md)
+[`banc_edgelist`](https://natverse.github.io/bancr/reference/banc_cave_tables.md)
 for programmatic connectivity data access
 
 ## Examples

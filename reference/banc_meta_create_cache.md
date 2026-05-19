@@ -3,7 +3,7 @@
 `banc_meta_create_cache()` builds or refreshes an in-memory cache of
 BANC metadata for efficient repeated lookups. You can choose the data
 source using `use_seatable`. The main accessor function
-[`banc_meta()`](https://flyconnectome.github.io/bancr/reference/banc_meta.md)
+[`banc_meta()`](https://natverse.github.io/bancr/reference/banc_meta.md)
 will always use the most recently created cache.
 
 ## Usage
@@ -39,7 +39,7 @@ this function to update the cache.
 ## See also
 
 Other coconatfly:
-[`register_banc_coconat()`](https://flyconnectome.github.io/bancr/reference/register_banc_coconat.md)
+[`register_banc_coconat()`](https://natverse.github.io/bancr/reference/register_banc_coconat.md)
 
 ## Examples
 

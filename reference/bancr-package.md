@@ -8,16 +8,15 @@ autosegmentation. Organised as a wrapper around the fafbseg package.
 There are several online bancr resources in addition to the built-in R
 help documentation. These include:
 
-- [Package README](https://flyconnectome.github.io/bancr/) including
-  [installation
-  details](https://flyconnectome.github.io/bancr/#installation) and an
-  [analysis full worked
-  example](https://flyconnectome.github.io/bancr/#ascending-neuron-vignette).
+- [Package README](https://natverse.github.io/bancr/) including
+  [installation details](https://natverse.github.io/bancr/#installation)
+  and an [analysis full worked
+  example](https://natverse.github.io/bancr/#ascending-neuron-vignette).
 
 - [Function
-  reference](https://flyconnectome.github.io/bancr/reference/index.html)
+  reference](https://natverse.github.io/bancr/reference/index.html)
 
-- [Getting help](https://flyconnectome.github.io/bancr/SUPPORT.html)
+- [Getting help](https://natverse.github.io/bancr/SUPPORT.html)
 
 Please see below for github source code and issues links.
 
@@ -25,11 +24,11 @@ Please see below for github source code and issues links.
 
 Useful links:
 
-- <https://github.com/flyconnectome/bancr>
+- <https://github.com/natverse/bancr>
 
-- <https://flyconnectome.github.io/bancr/>
+- <https://natverse.github.io/bancr/>
 
-- Report bugs at <https://github.com/flyconnectome/bancr/issues>
+- Report bugs at <https://github.com/natverse/bancr/issues>
 
 ## Author
 

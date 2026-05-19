@@ -76,11 +76,11 @@ located in the 'inst/extdata/brain_240721' directory.
 
 ## See also
 
-[`elastix_xform`](https://flyconnectome.github.io/bancr/reference/elastix_xform.md)
+[`elastix_xform`](https://natverse.github.io/bancr/reference/elastix_xform.md)
 for the underlying Elastix transformation function.
-[`banc_raw2nm`](https://flyconnectome.github.io/bancr/reference/banc_voxdims.md)
+[`banc_raw2nm`](https://natverse.github.io/bancr/reference/banc_voxdims.md)
 and
-[`banc_nm2raw`](https://flyconnectome.github.io/bancr/reference/banc_voxdims.md)
+[`banc_nm2raw`](https://natverse.github.io/bancr/reference/banc_voxdims.md)
 for unit conversion functions.
 
 ## Examples

@@ -47,7 +47,7 @@ for details.
 
 ## See also
 
-[`bancsee`](https://flyconnectome.github.io/bancr/reference/bancsee.md)
+[`bancsee`](https://natverse.github.io/bancr/reference/bancsee.md)
 
 ## Examples
 

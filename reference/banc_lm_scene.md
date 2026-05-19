@@ -4,14 +4,14 @@ Construct a Neuroglancer scene that overlays a light-microscopy
 precomputed image layer (e.g. the output of
 `neuronbridger::nrrd_to_precomputed` applied to a registered confocal
 stack) on top of the canonical public BANC scene from
-[`banc_scene`](https://flyconnectome.github.io/bancr/reference/banc_scene.md)
+[`banc_scene`](https://natverse.github.io/bancr/reference/banc_scene.md)
 (BANC EM, segmentation proofreading, region outlines, JRC2018F atlas,
 FAFB / hemibrain / MANC imported meshes, synapse cloud, nuclei) and
 either return a long fragment-encoded URL or, when `shorten = TRUE`,
 POST the state to the BANC state server and return a shortened
 `spelunker.cave-explorer.org/#!middleauth+...nglstate/api/v1/<id>` URL —
 the same URL form
-[`bancsee`](https://flyconnectome.github.io/bancr/reference/bancsee.md)
+[`bancsee`](https://natverse.github.io/bancr/reference/bancsee.md)
 produces.
 
 ## Usage
@@ -97,7 +97,7 @@ banc_lm_scene(
 
   Spelunker base URL with a starting state to extend. Defaults to the
   public BANC scene used by
-  [`banc_scene`](https://flyconnectome.github.io/bancr/reference/banc_scene.md).
+  [`banc_scene`](https://natverse.github.io/bancr/reference/banc_scene.md).
 
 - shorten:
 
@@ -143,8 +143,8 @@ precomputed directory is reachable, pass its URL as `lm_url`.
 
 ## See also
 
-[`banc_scene`](https://flyconnectome.github.io/bancr/reference/banc_scene.md),
-[`bancsee`](https://flyconnectome.github.io/bancr/reference/bancsee.md),
+[`banc_scene`](https://natverse.github.io/bancr/reference/banc_scene.md),
+[`bancsee`](https://natverse.github.io/bancr/reference/bancsee.md),
 `neuronbridger::nrrd_to_precomputed`
 
 ## Examples
