@@ -1,123 +1,166 @@
-#' Download all of the BANC synapses as a .sqlite file that you can read lazily from later
+#' Download BANC automatic synapse detections as a .sqlite file
 #'
-#' @details Downloads all automatic Zetta.ai synapse detections for the BANC and saves them as
-#' a \code{banc_data.sqlite} file. Once this is done, in the future the function will read from this file
-#' lazily so as not to throw the whole thing into system memory.
+#' @description Downloads a pre-baked Zetta.ai synapse table for the BANC
+#' from
+#' `gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_connectivity/v888/`
+#' and caches it as a per-version `banc_data_<version>.sqlite` file. After
+#' the one-off download subsequent calls read lazily from the cache so the
+#' table is never fully loaded into memory.
 #'
-#' @param path The google storage path to the desired synapses file. Read using \code{readr::read_csv}.
-#' @param overwrite Logical, whether or not to overwrite an extant \code{banc_data.sqlite} file.
-#' @param n_max Numeric, the maximum number of rows to read from \code{path} if you just want to see
-#' a taster of the file.
-#' @param details Logical Whether or not to read all data columns in the target synapse \code{.csv}. Defaults to
-#' \code{FALSE} in order to read only the essential presynapse position data.
-#' @param min_size Numeric, filter parameter, the minimum size (in nm) of the detected synapse.
-#' @param rawcoords Logical, whether or not to convert from raw coordinates into nanometers. Default is `FALSE`.
+#' @details
+#' Three versions are exposed, matching the BANC CAVE annotation tables of
+#' the same name. The version-specific metadata below is taken directly
+#' from each table's CAVE description; check
+#' <https://banc.community/Automated-segmentation> for the column-level
+#' documentation that ships with the source files.
 #'
-#' @return a data.frame
+#' \itemize{
+#'   \item \strong{v1} (deprecated). Source
+#'     `gs://zetta_lee_fly_cns_001_synapse/240623_run/assignment/final_edgelist.df`,
+#'     created 2024-07-25. Coordinates are in nanometers (CAVE
+#'     `voxel_resolution = c(1, 1, 1)`). The CAVE table owner notice marks
+#'     this version as deprecated in favour of v2.
+#'   \item \strong{v2} (default). Source
+#'     `gs://zetta_lee_fly_cns_001_synapse/250226_assignment/assignment/final_edgelist.df`,
+#'     created 2025-08-14. Coordinates are in nanometers (CAVE
+#'     `voxel_resolution = c(1, 1, 1)`). This is the current production
+#'     synapse table.
+#'   \item \strong{v3} (in testing). Created 2026-04-10. Coordinates are
+#'     reported on the synapse-detection grid with CAVE
+#'     `voxel_resolution = c(16, 16, 45)` nm/voxel - multiply by these
+#'     values to obtain nanometers. Marked "still in testing" by the table
+#'     owner.
+#' }
+#'
+#' Note that v1 and v2 coordinates are already in nanometers, which
+#' differs from most BANC CAVE tables (those use the EM image grid of
+#' `c(4, 4, 45)` nm/voxel).
+#'
+#' Each version's `synapses_<version>_human_readable.csv.gz` is large
+#' (~12 GB gzipped for v2). The 15 columns are, in order:
+#' `id`, `pre_x`, `pre_y`, `pre_z`, `post_x`, `post_y`, `post_z`,
+#' `centroid_x`, `centroid_y`, `centroid_z`, `size`,
+#' `pre_pt_supervoxel_id`, `pre_pt_root_id`,
+#' `post_pt_supervoxel_id`, `post_pt_root_id`.
+#'
+#' @param version Character, which synapse table to download. One of
+#'   `"v2"` (default), `"v1"`, or `"v3"`.
+#' @param overwrite Logical, whether or not to overwrite an extant
+#'   `banc_data_<version>.sqlite` cache.
+#' @param n_max Numeric, the maximum number of rows to stream lazily from
+#'   the CSV when previewing. Set to `NULL` to trigger a full download
+#'   into the SQLite cache.
+#' @param details Logical. If `FALSE` (default) only the essential
+#'   pre-side columns (`id`, `pre_pt_root_id`, `pre_x`, `pre_y`, `pre_z`,
+#'   `size`) are read; if `TRUE` all 15 columns are kept.
+#' @param path Optional explicit override of the HTTPS URL. Normally left
+#'   `NULL` so the path is built from `version`.
+#'
+#' @return a data.frame (or a lazy `dplyr::tbl` backed by SQLite when the
+#'   full table has been cached).
 #'
 #' @seealso \code{\link{banc_partner_summary}}, \code{\link{banc_partners}}
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' # Default: v2, preview first 2000 rows lazily from the CSV
 #' syns <- banc_all_synapses()
+#'
+#' # Full download of v2 (~12 GB gzipped) into the per-version SQLite cache
+#' syns_all <- banc_all_synapses(n_max = NULL)
+#'
+#' # Switch to the deprecated v1 table or the in-testing v3 table
+#' syns_v1 <- banc_all_synapses(version = "v1")
+#' syns_v3 <- banc_all_synapses(version = "v3")
 #' }
-banc_all_synapses <- function(path = c("gs://lee-lab_brain-and-nerve-cord-fly-connectome/synapses/v2.0/final_edgelist.csv",
-                                       "gs://zetta_lee_fly_cns_001_synapse/240623_run/assignment/final_edgelist.df"),
+banc_all_synapses <- function(version = c("v2", "v1", "v3"),
                               overwrite = FALSE,
                               n_max = 2000,
                               details = FALSE,
-                              min_size = 10,
-                              rawcoords = FALSE){
-  # Correct path to de-authenticate it, use https
-  path <- match.arg(path)
-  path <- gsub("^gs\\:\\/","https://storage.googleapis.com",path)
+                              path = NULL) {
+  version <- match.arg(version)
+  if (is.null(path)) {
+    path <- sprintf(
+      "https://storage.googleapis.com/lee-lab_brain-and-nerve-cord-fly-connectome/neuron_connectivity/v888/synapses_%s_human_readable.csv.gz",
+      version
+    )
+  }
 
-  # Check if the file exists, if not, create it
-  file_path <- file.path(system.file(package = "bancr"), "data", "banc_data.sqlite")
   if (!requireNamespace("DBI", quietly = TRUE) || !requireNamespace("RSQLite", quietly = TRUE)) {
     stop("Packages 'DBI' and 'RSQLite' are required for this function. Please install them with: install.packages(c('DBI', 'RSQLite'))")
   }
+  if (!requireNamespace("readr", quietly = TRUE)) {
+    stop("Package 'readr' is required for this function. Please install it with: install.packages('readr')")
+  }
+
+  # Column layout of the headerless human_readable CSVs. v1/v2 store
+  # coordinates in nanometers; v3 stores them on a 16/16/45 grid (see
+  # CAVE descriptions in @details).
+  col_names_all <- c(
+    "id",
+    "pre_x", "pre_y", "pre_z",
+    "post_x", "post_y", "post_z",
+    "centroid_x", "centroid_y", "centroid_z",
+    "size",
+    "pre_pt_supervoxel_id", "pre_pt_root_id",
+    "post_pt_supervoxel_id", "post_pt_root_id"
+  )
+  col_select_essential <- c("id", "pre_pt_root_id",
+                            "pre_x", "pre_y", "pre_z", "size")
+  col.types <- readr::cols(
+    id                    = readr::col_double(),
+    pre_x                 = readr::col_integer(),
+    pre_y                 = readr::col_integer(),
+    pre_z                 = readr::col_integer(),
+    post_x                = readr::col_integer(),
+    post_y                = readr::col_integer(),
+    post_z                = readr::col_integer(),
+    centroid_x            = readr::col_integer(),
+    centroid_y            = readr::col_integer(),
+    centroid_z            = readr::col_integer(),
+    size                  = readr::col_double(),
+    pre_pt_supervoxel_id  = readr::col_character(),
+    pre_pt_root_id        = readr::col_character(),
+    post_pt_supervoxel_id = readr::col_character(),
+    post_pt_root_id       = readr::col_character()
+  )
+
+  # Per-version SQLite cache. Pre-existing v1 caches keep their legacy
+  # path so old installations still work.
+  file_path <- file.path(system.file(package = "bancr"), "data",
+                         sprintf("banc_data_%s.sqlite", version))
   if (!file.exists(file_path)) {
     con <- DBI::dbConnect(RSQLite::SQLite(), file_path)
     DBI::dbDisconnect(con)
     table_exists <- FALSE
     message("Created: ", file_path)
-  }else{
-    # Check if the 'synapses' table exists
+  } else {
     con <- DBI::dbConnect(RSQLite::SQLite(), file_path)
     table_exists <- "synapses" %in% DBI::dbListTables(con)
+    DBI::dbDisconnect(con)
   }
 
-  if (!requireNamespace("readr", quietly = TRUE)) {
-    stop("Package 'readr' is required for this function. Please install it with: install.packages('readr')")
-  }
-  # The column types for our read
-  col.types <- readr::cols(
-    .default = readr::col_character(),
-    cleft_segid  = readr::col_character(),
-    centroid_x = readr::col_number(),
-    centroid_y = readr::col_number(),
-    centroid_z = readr::col_number(),
-    bbox_bx = readr::col_number(),
-    bbox_by = readr::col_number(),
-    bbox_bz = readr::col_number(),
-    bbox_ex = readr::col_number(),
-    bbox_ey = readr::col_number(),
-    bbox_ez = readr::col_number(),
-    presyn_segid = readr::col_character(),
-    postsyn_segid  = readr::col_character(),
-    presyn_x = readr::col_integer(),
-    presyn_y = readr::col_integer(),
-    presyn_z = readr::col_integer(),
-    postsyn_x = readr::col_integer(),
-    postsyn_y = readr::col_integer(),
-    postsyn_z = readr::col_integer(),
-    clefthash = readr::col_number(),
-    partnerhash = readr::col_integer(),
-    size = readr::col_number(),
-    clefthash = readr::col_number(),
-    partnerhash = readr::col_number()
+  read_args <- list(
+    file      = path,
+    col_names = col_names_all,
+    col_types = col.types,
+    lazy      = TRUE
   )
+  if (!details) read_args$col_select <- col_select_essential
 
-  # Are we just sampling or going for the full thing?
-  if(!is.null(n_max)){
-    if(details){
-      syns <- readr::read_csv(file=path, col_types = col.types, lazy = TRUE, n_max = n_max)
-    }else{
-      syns <- readr::read_csv(file=path, col_types = col.types, lazy = TRUE, n_max = n_max,
-                              col_select = c("presyn_segid", "presyn_x", "presyn_y", "presyn_z", "size"))
-    }
-    return(syns)
-  }else if (!table_exists|overwrite){
-    # Get all synapses
-    if (details){
-      syns <- readr::read_csv(file=path, col_types = col.types, lazy = TRUE)
-    }else{
-      syns <- readr::read_csv(file=path, col_types = col.types, lazy = TRUE,
-                              col_select = c("presyn_segid", "presyn_x", "presyn_y", "presyn_z", "size"))
-    }
-
-    # # Process
-    # if(!is.null(min_size)){
-    #   syns <- syns %>%
-    #     dplyr::filter(size>=min_size)
-    # }
-    # if(!rawcoords){
-    #   syns[,c("presyn_x", "presyn_y", "presyn_z")] <- bancr::banc_raw2nm(syns[,c("presyn_x", "presyn_y", "presyn_z")])
-    # }
-
-    # Connect to the SQLite database
+  if (!is.null(n_max)) {
+    read_args$n_max <- n_max
+    return(do.call(readr::read_csv, read_args))
+  } else if (!table_exists || overwrite) {
+    syns <- do.call(readr::read_csv, read_args)
     con <- DBI::dbConnect(RSQLite::SQLite(), file_path)
-
-    # Write the data frame to the 'synapses' table
-    # If the table already exists, it will be overwritten
     DBI::dbWriteTable(con, "synapses", syns, overwrite = TRUE)
     DBI::dbDisconnect(con)
     message("Added tab synapses, no. rows: ", nrow(syns))
   }
 
-  # Read
+  con <- DBI::dbConnect(RSQLite::SQLite(), file_path)
   dplyr::tbl(src = con, from = "synapses")
 
 }

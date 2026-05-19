@@ -2,48 +2,93 @@
 % Please edit documentation in R/synapses.R
 \name{banc_all_synapses}
 \alias{banc_all_synapses}
-\title{Download all of the BANC synapses as a .sqlite file that you can read lazily from later}
+\title{Download BANC automatic synapse detections as a .sqlite file}
 \usage{
 banc_all_synapses(
-  path =
-    c("gs://lee-lab_brain-and-nerve-cord-fly-connectome/synapses/v2.0/final_edgelist.csv",
-    "gs://zetta_lee_fly_cns_001_synapse/240623_run/assignment/final_edgelist.df"),
+  version = c("v2", "v1", "v3"),
   overwrite = FALSE,
   n_max = 2000,
   details = FALSE,
-  min_size = 10,
-  rawcoords = FALSE
+  path = NULL
 )
 }
 \arguments{
-\item{path}{The google storage path to the desired synapses file. Read using \code{readr::read_csv}.}
+\item{version}{Character, which synapse table to download. One of
+\code{"v2"} (default), \code{"v1"}, or \code{"v3"}.}
 
-\item{overwrite}{Logical, whether or not to overwrite an extant \code{banc_data.sqlite} file.}
+\item{overwrite}{Logical, whether or not to overwrite an extant
+\verb{banc_data_<version>.sqlite} cache.}
 
-\item{n_max}{Numeric, the maximum number of rows to read from \code{path} if you just want to see
-a taster of the file.}
+\item{n_max}{Numeric, the maximum number of rows to stream lazily from
+the CSV when previewing. Set to \code{NULL} to trigger a full download
+into the SQLite cache.}
 
-\item{details}{Logical Whether or not to read all data columns in the target synapse \code{.csv}. Defaults to
-\code{FALSE} in order to read only the essential presynapse position data.}
+\item{details}{Logical. If \code{FALSE} (default) only the essential
+pre-side columns (\code{id}, \code{pre_pt_root_id}, \code{pre_x}, \code{pre_y}, \code{pre_z},
+\code{size}) are read; if \code{TRUE} all 15 columns are kept.}
 
-\item{min_size}{Numeric, filter parameter, the minimum size (in nm) of the detected synapse.}
-
-\item{rawcoords}{Logical, whether or not to convert from raw coordinates into nanometers. Default is \code{FALSE}.}
+\item{path}{Optional explicit override of the HTTPS URL. Normally left
+\code{NULL} so the path is built from \code{version}.}
 }
 \value{
-a data.frame
+a data.frame (or a lazy \code{dplyr::tbl} backed by SQLite when the
+full table has been cached).
 }
 \description{
-Download all of the BANC synapses as a .sqlite file that you can read lazily from later
+Downloads a pre-baked Zetta.ai synapse table for the BANC
+from
+\verb{gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_connectivity/v888/}
+and caches it as a per-version \verb{banc_data_<version>.sqlite} file. After
+the one-off download subsequent calls read lazily from the cache so the
+table is never fully loaded into memory.
 }
 \details{
-Downloads all automatic Zetta.ai synapse detections for the BANC and saves them as
-a \code{banc_data.sqlite} file. Once this is done, in the future the function will read from this file
-lazily so as not to throw the whole thing into system memory.
+Three versions are exposed, matching the BANC CAVE annotation tables of
+the same name. The version-specific metadata below is taken directly
+from each table's CAVE description; check
+\url{https://banc.community/Automated-segmentation} for the column-level
+documentation that ships with the source files.
+
+\itemize{
+\item \strong{v1} (deprecated). Source
+\verb{gs://zetta_lee_fly_cns_001_synapse/240623_run/assignment/final_edgelist.df},
+created 2024-07-25. Coordinates are in nanometers (CAVE
+\code{voxel_resolution = c(1, 1, 1)}). The CAVE table owner notice marks
+this version as deprecated in favour of v2.
+\item \strong{v2} (default). Source
+\verb{gs://zetta_lee_fly_cns_001_synapse/250226_assignment/assignment/final_edgelist.df},
+created 2025-08-14. Coordinates are in nanometers (CAVE
+\code{voxel_resolution = c(1, 1, 1)}). This is the current production
+synapse table.
+\item \strong{v3} (in testing). Created 2026-04-10. Coordinates are
+reported on the synapse-detection grid with CAVE
+\code{voxel_resolution = c(16, 16, 45)} nm/voxel - multiply by these
+values to obtain nanometers. Marked "still in testing" by the table
+owner.
+}
+
+Note that v1 and v2 coordinates are already in nanometers, which
+differs from most BANC CAVE tables (those use the EM image grid of
+\code{c(4, 4, 45)} nm/voxel).
+
+Each version's \verb{synapses_<version>_human_readable.csv.gz} is large
+(~12 GB gzipped for v2). The 15 columns are, in order:
+\code{id}, \code{pre_x}, \code{pre_y}, \code{pre_z}, \code{post_x}, \code{post_y}, \code{post_z},
+\code{centroid_x}, \code{centroid_y}, \code{centroid_z}, \code{size},
+\code{pre_pt_supervoxel_id}, \code{pre_pt_root_id},
+\code{post_pt_supervoxel_id}, \code{post_pt_root_id}.
 }
 \examples{
 \dontrun{
+# Default: v2, preview first 2000 rows lazily from the CSV
 syns <- banc_all_synapses()
+
+# Full download of v2 (~12 GB gzipped) into the per-version SQLite cache
+syns_all <- banc_all_synapses(n_max = NULL)
+
+# Switch to the deprecated v1 table or the in-testing v3 table
+syns_v1 <- banc_all_synapses(version = "v1")
+syns_v3 <- banc_all_synapses(version = "v3")
 }
 }
 \seealso{

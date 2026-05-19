@@ -16,7 +16,7 @@ Authors@R:
 Description: Access to the BANC 'righty' EM dataset, focussing on support for
     BANC autosegmentation. Organised as a wrapper around the fafbseg
     package.
-License: GPL-3
+License: GPL (>= 3)
 URL: https://github.com/flyconnectome/bancr, https://flyconnectome.github.io/bancr/
 BugReports: https://github.com/flyconnectome/bancr/issues
 Depends: 
