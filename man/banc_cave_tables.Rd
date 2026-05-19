@@ -32,6 +32,7 @@ banc_mitochondria(
   rootids = NULL,
   table = "mitochondria_v1",
   rawcoords = FALSE,
+  chunk_size = 200000L,
   ...
 )
 
@@ -86,6 +87,12 @@ to pass in data.frames, BANC URLs or simple ids.}
 \item{table}{Character, possible alternative tables for the sort of data frame the function returns. One must be chosen.}
 
 \item{rawcoords}{Logical, whether or not to convert from raw coordinates into nanometers. Default is \code{FALSE}.}
+
+\item{chunk_size}{Integer page size for full-table pulls (used only when
+\code{rootids = NULL}). The mitochondria_v1 table has millions of rows and a
+single materialised response trips reticulate's string parser
+(\code{Error: basic_string}); paginating by \code{limit}/\code{offset} keeps each
+response small enough to cross the R/Python boundary. Default 200000.}
 
 \item{nucleus_ids}{Character vector specifying one or more BANC nucleus ids.
 The nucleus (\url{https://en.wikipedia.org/wiki/Cell_nucleus}) contains

@@ -153,7 +153,11 @@ matched query.
 A data frame with one row per neuron across the chosen
 source tables. Columns are the union of the requested tables'
 schemas; rows from a table missing a given column carry \code{NA} for
-that column.
+that column. When more than one source table is read, a unified
+\code{neuron_id} column is added: each row carries the ID from its
+originating table's per-source ID column (\code{fafb_id}, \code{manc_id},
+\code{hemibrain_121_id}, or \code{malecns_09_id}), coalesced into the single
+\code{neuron_id}. The original per-source ID columns are preserved.
 }
 \description{
 These functions use the logic and wrap some code
