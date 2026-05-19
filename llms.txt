@@ -760,8 +760,7 @@ remains under its existing OSI-approved open-source license — see
 - [`banc_add_synapses()`](https://flyconnectome.github.io/bancr/reference/banc_add_synapses.md)
   : Add synapses to neuron objects
 - [`banc_all_synapses()`](https://flyconnectome.github.io/bancr/reference/banc_all_synapses.md)
-  : Download all of the BANC synapses as a .sqlite file that you can
-  read lazily from later
+  : Download BANC automatic synapse detections as a .sqlite file
 - [`banc_annotate_backbone_proofread()`](https://flyconnectome.github.io/bancr/reference/banc_annotate_backbone_proofread.md)
   : Annotate positions as backbone proofread
 - [`banc_cave_client()`](https://flyconnectome.github.io/bancr/reference/banc_cave_client.md)
