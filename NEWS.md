@@ -1,4 +1,4 @@
-# bancr 0.3.1 (development)
+# bancr 0.3.1
 
 * Repository moved from `flyconnectome/bancr` to `natverse/bancr`. The
   old URL continues to redirect, but please update local clones with
