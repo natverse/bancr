@@ -247,7 +247,12 @@ query.
 
 A data frame with one row per neuron across the chosen source tables.
 Columns are the union of the requested tables' schemas; rows from a
-table missing a given column carry `NA` for that column.
+table missing a given column carry `NA` for that column. When more than
+one source table is read, a unified `neuron_id` column is added: each
+row carries the ID from its originating table's per-source ID column
+(`fafb_id`, `manc_id`, `hemibrain_121_id`, or `malecns_09_id`),
+coalesced into the single `neuron_id`. The original per-source ID
+columns are preserved.
 
 ## Details
 

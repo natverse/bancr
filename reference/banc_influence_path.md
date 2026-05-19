@@ -22,5 +22,7 @@ banc_influence_path(local_path = NULL, force_download = FALSE, gs_url = NULL)
 
 - gs_url:
 
-  GCS path to the influence parquet directory. Defaults to the v850
-  all-to-all influence data.
+  GCS path to the influence parquet directory. Defaults to the v888
+  all-to-all influence data in the lee-lab BANC bucket (the
+  `brain-and-nerve-cord_exports/.../banc_850/...` source used in earlier
+  bancr versions is no longer maintained, see 2026-04 bucket migration).

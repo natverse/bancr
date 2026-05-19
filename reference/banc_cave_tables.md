@@ -26,6 +26,7 @@ banc_mitochondria(
   rootids = NULL,
   table = "mitochondria_v1",
   rawcoords = FALSE,
+  chunk_size = 200000L,
   ...
 )
 
@@ -102,6 +103,14 @@ banc_version()
 
   Logical, whether or not to convert from raw coordinates into
   nanometers. Default is `FALSE`.
+
+- chunk_size:
+
+  Integer page size for full-table pulls (used only when
+  `rootids = NULL`). The mitochondria_v1 table has millions of rows and
+  a single materialised response trips reticulate's string parser
+  (`Error: basic_string`); paginating by `limit`/`offset` keeps each
+  response small enough to cross the R/Python boundary. Default 200000.
 
 - nucleus_ids:
 
