@@ -19,16 +19,15 @@ banctable_move_to_bigdata moves rows between normal backend and big data backend
 When invert=FALSE (archive), it moves all rows from a specified view to big data storage.
 When invert=TRUE (unarchive), it moves specific rows by row_id from big data storage back to normal backend.
 Note: The big data backend must be enabled in your base for these functions to work.
-The cns_meta base holds the BANC project's reformulated views of
-each external connectome's meta-data — FAFB-FlyWire, MANC, Hemibrain
-and maleCNS. Each source dataset's per-neuron records have been
+franken_meta() returns the BANC project's reformulated views of
+each external connectome (FAFB-FlyWire, MANC, Hemibrain and maleCNS),
 re-keyed into BANC's annotation scheme (the same flow /
 super_class / cell_class / cell_sub_class / cell_type /
 hemilineage / region / nerve / neuromere / function /
-body_part / neurochemistry vocabularies banc_meta uses), so each
-row can be compared directly against the corresponding BANC neuron.
-Source-specific identifiers and labels are retained alongside the
-BANC-shaped columns (e.g. FAFB_cell_type, MANC_class)."><meta property="og:description" content="These functions use the logic and wrap some code
+body_part / neurochemistry vocabularies banc_meta() uses). Each row
+can be compared directly against the corresponding BANC neuron;
+source-specific identifiers and labels are retained alongside the
+BANC-shaped columns."><meta property="og:description" content="These functions use the logic and wrap some code
 from the flytable_.* functions in the fafbseg R package.
 banctable_set_token will obtain and store a permanent
 seatable user-level API token.
@@ -48,16 +47,15 @@ banctable_move_to_bigdata moves rows between normal backend and big data backend
 When invert=FALSE (archive), it moves all rows from a specified view to big data storage.
 When invert=TRUE (unarchive), it moves specific rows by row_id from big data storage back to normal backend.
 Note: The big data backend must be enabled in your base for these functions to work.
-The cns_meta base holds the BANC project's reformulated views of
-each external connectome's meta-data — FAFB-FlyWire, MANC, Hemibrain
-and maleCNS. Each source dataset's per-neuron records have been
+franken_meta() returns the BANC project's reformulated views of
+each external connectome (FAFB-FlyWire, MANC, Hemibrain and maleCNS),
 re-keyed into BANC's annotation scheme (the same flow /
 super_class / cell_class / cell_sub_class / cell_type /
 hemilineage / region / nerve / neuromere / function /
-body_part / neurochemistry vocabularies banc_meta uses), so each
-row can be compared directly against the corresponding BANC neuron.
-Source-specific identifiers and labels are retained alongside the
-BANC-shaped columns (e.g. FAFB_cell_type, MANC_class)."><meta property="og:image" content="https://natverse.github.io/bancr/logo.png"></head><body>
+body_part / neurochemistry vocabularies banc_meta() uses). Each row
+can be compared directly against the corresponding BANC neuron;
+source-specific identifiers and labels are retained alongside the
+BANC-shaped columns."><meta property="og:image" content="https://natverse.github.io/bancr/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -87,7 +85,7 @@ BANC-shaped columns (e.g. FAFB_cell_type, MANC_class)."><meta property="og:image
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Read and write to the seatable for draft BANC annotations</h1>
-      <small class="dont-index">Source: <a href="https://github.com/natverse/bancr/blob/v0.3.1/R/banc-table.R" class="external-link"><code>R/banc-table.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/natverse/bancr/blob/main/R/banc-table.R" class="external-link"><code>R/banc-table.R</code></a></small>
       <div class="d-none name"><code>banctable_query.Rd</code></div>
     </div>
 
@@ -112,16 +110,15 @@ added directly to the big data backend using the <code>/add-archived-rows/</code
 When <code>invert=FALSE</code> (archive), it moves all rows from a specified view to big data storage.
 When <code>invert=TRUE</code> (unarchive), it moves specific rows by row_id from big data storage back to normal backend.
 Note: The big data backend must be enabled in your base for these functions to work.</p>
-<p>The cns_meta base holds the BANC project's reformulated views of
-each external connectome's meta-data — FAFB-FlyWire, MANC, Hemibrain
-and maleCNS. Each source dataset's per-neuron records have been
+<p><code>franken_meta()</code> returns the BANC project's reformulated views of
+each external connectome (FAFB-FlyWire, MANC, Hemibrain and maleCNS),
 re-keyed into BANC's annotation scheme (the same <code>flow</code> /
 <code>super_class</code> / <code>cell_class</code> / <code>cell_sub_class</code> / <code>cell_type</code> /
 <code>hemilineage</code> / <code>region</code> / <code>nerve</code> / <code>neuromere</code> / function /
-body_part / neurochemistry vocabularies banc_meta uses), so each
-row can be compared directly against the corresponding BANC neuron.
-Source-specific identifiers and labels are retained alongside the
-BANC-shaped columns (e.g. <code>FAFB_cell_type</code>, <code>MANC_class</code>).</p>
+body_part / neurochemistry vocabularies <code><a href="banc_meta.html">banc_meta()</a></code> uses). Each row
+can be compared directly against the corresponding BANC neuron;
+source-specific identifiers and labels are retained alongside the
+BANC-shaped columns.</p>
     </div>
 
     <div class="section level2">
@@ -177,9 +174,10 @@ BANC-shaped columns (e.g. <code>FAFB_cell_type</code>, <code>MANC_class</code>).
 <span></span>
 <span><span class="fu">franken_meta</span><span class="op">(</span></span>
 <span>  tables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fafb"</span>, <span class="st">"manc"</span><span class="op">)</span>,</span>
+<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gcs"</span>, <span class="st">"seatable"</span>, <span class="st">"legacy"</span><span class="op">)</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  sql <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  base <span class="op">=</span> <span class="st">"cns_meta"</span>,</span>
-<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"split"</span>, <span class="st">"legacy"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -202,7 +200,7 @@ BANC-shaped columns (e.g. <code>FAFB_cell_type</code>, <code>MANC_class</code>).
 <dl><dt id="arg-sql">sql<a class="anchor" aria-label="anchor" href="#arg-sql"></a></dt>
 <dd><p>Optional. If supplied, bypasses the table-union logic and
 passes the SQL verbatim to <code>banctable_query()</code>. Mainly used to
-query the (still-extant) legacy <code>franken_meta</code> table directly, e.g.
+query a SeaTable table directly, e.g.
 <code>franken_meta(sql = "SELECT * FROM franken_meta")</code>.</p></dd>
 
 
@@ -213,7 +211,8 @@ queries to 100 rows. We increase the limit to 100000 rows by default.</p></dd>
 
 
 <dt id="arg-base">base<a class="anchor" aria-label="anchor" href="#arg-base"></a></dt>
-<dd><p>SeaTable base name. Defaults to <code>"cns_meta"</code>.</p></dd>
+<dd><p>SeaTable base name (only used when <code>source</code> is
+<code>"seatable"</code> or <code>"legacy"</code>). Defaults to <code>"cns_meta"</code>.</p></dd>
 
 
 <dt id="arg-python">python<a class="anchor" aria-label="anchor" href="#arg-python"></a></dt>
@@ -274,7 +273,7 @@ column that can identify each row in the remote table.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Passed to <code>banctable_query()</code>.</p></dd>
+<dd><p>Passed to <code>banctable_query()</code> when reading from SeaTable.</p></dd>
 
 
 <dt id="arg-view-name">view_name<a class="anchor" aria-label="anchor" href="#arg-view-name"></a></dt>
@@ -300,16 +299,18 @@ column that can identify each row in the remote table.</p></dd>
 <dt id="arg-tables">tables<a class="anchor" aria-label="anchor" href="#arg-tables"></a></dt>
 <dd><p>Character vector of source tables to read and append.
 Any combination of <code>"fafb"</code>, <code>"manc"</code>, <code>"hemibrain"</code>, <code>"malecns"</code>.
-Defaults to <code>c("fafb", "manc")</code> — the FAFB+MANC union, which is the
-closest equivalent to the historical <code>franken_meta</code> table.</p></dd>
+Defaults to <code>c("fafb", "manc")</code> — the FAFB+MANC union, the closest
+equivalent to the historical single <code>franken_meta</code> table.</p></dd>
 
 
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
-<dd><p>Optional shortcut. <code>"split"</code> (default, post-migration)
-reads the per-source <code>tables</code> and unions them; <code>"legacy"</code> reads
-the original single <code>franken_meta</code> table (retained as a backup
-until the split is fully verified — it is no longer the source of
-truth as of the 2026-05-15 migration).</p></dd>
+<dd><p><code>"gcs"</code> (default, public feathers), <code>"seatable"</code> (BANC
+production team only) or <code>"legacy"</code> (deprecated single SeaTable).</p></dd>
+
+
+<dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> and <code>source = "gcs"</code>, re-download
+the cached feathers even if they already exist.</p></dd>
 
 
 <dt id="arg-bigdata">bigdata<a class="anchor" aria-label="anchor" href="#arg-bigdata"></a></dt>
@@ -321,22 +322,32 @@ truth as of the 2026-05-15 migration).</p></dd>
     <p>a <code>data.frame</code> of results. There should be 0 rows if no rows
 matched query.</p>
 <p>A data frame with one row per neuron across the chosen
-source tables. Columns are the union of the requested tables'
-schemas; rows from a table missing a given column carry <code>NA</code> for
-that column. When more than one source table is read, a unified
+source tables. When more than one source table is read, a unified
 <code>neuron_id</code> column is added: each row carries the ID from its
-originating table's per-source ID column (<code>fafb_id</code>, <code>manc_id</code>,
-<code>hemibrain_121_id</code>, or <code>malecns_09_id</code>), coalesced into the single
+originating table's per-source ID column (<code>fafb_id</code> / <code>fafb_783_id</code>,
+<code>manc_id</code> / <code>manc_121_id</code>, <code>hemibrain_id</code> / <code>hemibrain_121_id</code>,
+<code>malecns_id</code> / <code>malecns_09_id</code>), coalesced into the single
 <code>neuron_id</code>. The original per-source ID columns are preserved.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The historical single-table <code>franken_meta</code> is being phased out in
-favour of four separable per-source tables: <code>fafb</code>, <code>manc</code>,
-<code>hemibrain</code>, <code>malecns</code>. The new tables don't all carry exactly the
-same column set (FAFB_* columns only in <code>fafb</code>, MANC_* only in
-<code>manc</code>, and so on) — <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">dplyr::bind_rows()</a></code> is used to take the
-column-union when reading more than one.</p>
+    <p>Two sources of these tables are supported. The default <code>"gcs"</code> reads
+per-dataset feathers from the public bucket at
+<code>gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/&lt;slug&gt;/&lt;slug&gt;_meta.feather</code>
+(slugs <code>fafb_783</code>, <code>manc_121</code>, <code>hemibrain_121</code>, <code>malecns_09</code>). No
+authentication is required and the feathers are cached locally under
+<code>tools::R_user_dir("bancr", "cache")</code>. This is the recommended path
+for almost all users.</p>
+<p>The <code>"seatable"</code> source is restricted to the BANC production team and
+reads the in-progress per-source SeaTable tables (<code>fafb</code>, <code>manc</code>,
+<code>hemibrain</code>, <code>malecns</code>) in the <code>cns_meta</code> base via <code>banctable_query()</code>.
+It requires a valid <code>BANCTABLE_TOKEN</code>. The <code>"legacy"</code> source reads the
+single, deprecated <code>franken_meta</code> SeaTable as a backup; it is no
+longer the source of truth post-2026-05-15.</p>
+<p>When multiple <code>tables</code> are requested, <code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">dplyr::bind_rows()</a></code> takes the
+column-union; FAFB_<em>, MANC_</em>, hemibrain-specific and malecns-specific
+columns survive only on the rows that come from the table that owns
+them.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -387,7 +398,7 @@ column-union when reading more than one.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Default: FAFB + MANC union (closest equivalent to old franken_meta)</span></span></span>
+<span class="r-in"><span><span class="co"># Default: FAFB + MANC union read from the public GCS feathers.</span></span></span>
 <span class="r-in"><span><span class="va">fk</span> <span class="op">&lt;-</span> <span class="fu">franken_meta</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Only the FAFB rows</span></span></span>
@@ -396,7 +407,13 @@ column-union when reading more than one.</p>
 <span class="r-in"><span><span class="co"># All four source tables, column-unioned</span></span></span>
 <span class="r-in"><span><span class="va">all</span> <span class="op">&lt;-</span> <span class="fu">franken_meta</span><span class="op">(</span>tables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"fafb"</span>, <span class="st">"manc"</span>, <span class="st">"hemibrain"</span>, <span class="st">"malecns"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Legacy single-table read (still available until decommission)</span></span></span>
+<span class="r-in"><span><span class="co"># Force a fresh download of the cached feathers</span></span></span>
+<span class="r-in"><span><span class="va">fk_fresh</span> <span class="op">&lt;-</span> <span class="fu">franken_meta</span><span class="op">(</span>overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># BANC production team: pull the in-progress SeaTable instead.</span></span></span>
+<span class="r-in"><span><span class="va">fk_st</span> <span class="op">&lt;-</span> <span class="fu">franken_meta</span><span class="op">(</span>source <span class="op">=</span> <span class="st">"seatable"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Legacy single-table SeaTable read (deprecated; still available)</span></span></span>
 <span class="r-in"><span><span class="va">legacy</span> <span class="op">&lt;-</span> <span class="fu">franken_meta</span><span class="op">(</span>source <span class="op">=</span> <span class="st">"legacy"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

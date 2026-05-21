@@ -1,5 +1,33 @@
 # Changelog
 
+## bancr 0.3.2 (development)
+
+- [`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md)
+  now defaults to `source = "gcs"`, reading the public compiled meta
+  feather at
+  `gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/banc_888/banc_888_meta.feather`.
+  This needs no BANC authentication and avoids the slow CAVE union of
+  [`banc_cell_info()`](https://natverse.github.io/bancr/reference/banc_cave_tables.md) +
+  [`banc_codex_annotations()`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md).
+  - `source = "cave"` keeps the previous CAVE-derived behaviour for
+    callers who need labels fresher than the GCS snapshot.
+  - `source = "seatable"` reads the draft `banc_meta` SeaTable and is
+    restricted to the BANC production team. The dead SQL bug in this
+    branch (renaming `super_class` despite never selecting it) is fixed.
+  - The `use_seatable` argument is kept as a deprecated alias.
+- [`franken_meta()`](https://natverse.github.io/bancr/reference/banctable_query.md)
+  likewise defaults to `source = "gcs"`, reading per-dataset compiled
+  feathers from `compiled_data/<slug>/<slug>_meta.feather` (`fafb_783`,
+  `manc_121`, `hemibrain_121`, `malecns_09`). `source = "seatable"`
+  (formerly the `"split"` default) and `source = "legacy"` remain for
+  production-team callers.
+- New internal helper `banc_gcs_meta_feather()` (downloads + caches a
+  compiled meta feather under `tools::R_user_dir("bancr", "cache")`).
+  Adds a soft dependency on the `arrow` package, already in `Suggests`.
+- README: new “Getting BANC meta data” section advertising the GCS
+  feather as the main route for almost all users, and clarifying that
+  the `banctable_*` family is for the BANC production team only.
+
 ## bancr 0.3.1
 
 - Repository moved from `flyconnectome/bancr` to `natverse/bancr`. The

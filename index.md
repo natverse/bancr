@@ -47,6 +47,65 @@ Mapping complete neural pathways underlying specific behaviours -
 **Comparative connectomics**: Understanding how nervous system
 organisation relates to behavioural complexity
 
+## Getting BANC meta data
+
+For nearly all users, the recommended way to get BANC neuron metadata is
+the **public compiled meta feather** that ships in the lee-lab GCS
+bucket:
+
+    gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/banc_888/banc_888_meta.feather
+
+That one file (~55 MB) is a harmonised per-neuron table of ~188 k rows ×
+75 columns — root IDs, soma side, the full BANC annotation hierarchy
+(`flow` / `super_class` / `cell_class` / `cell_sub_class` /
+`cell_type`), cross-dataset matches (`fafb_*`, `manc_*`, `hemibrain_*`,
+`malecns_*`, `fanc_*`), neurotransmitter predictions, hemilineage,
+neuropil membership and more. Schema details are in the [dataset
+documentation](https://github.com/sjcabs/fly_connectome_data_tutorial/tree/main/data/dataset_documentation).
+
+`bancr` wraps it for you:
+
+``` r
+
+library(bancr)
+
+# Download (one-time, cached) and load the compiled meta feather.
+# No CAVE / SeaTable authentication is needed for this path.
+banc_meta_create_cache()        # source = "gcs" is the default
+
+# Quick lookups against the in-memory cache
+all_meta   <- banc_meta()
+dna02_meta <- banc_meta(ids = "/type:DNa02")
+```
+
+The
+[`banc_meta()`](https://natverse.github.io/bancr/reference/banc_meta.md)
+accessor returns the 6 canonical columns used by
+[coconatfly](https://natverse.org/coconatfly/) (`id`, `class`, `type`,
+`side`, `subclass`, `subsubclass`). To work with the full 75-column
+feather directly, point
+[`arrow::read_feather()`](https://arrow.apache.org/docs/r/reference/read_feather.html)
+at the URL above.
+
+Two alternative sources are available for advanced users:
+
+- `banc_meta_create_cache(source = "cave")` — live read from
+  [`banc_cell_info()`](https://natverse.github.io/bancr/reference/banc_cave_tables.md) +
+  [`banc_codex_annotations()`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md)
+  (needs BANC CAVE access). Use this when you need labels fresher than
+  the latest GCS snapshot.
+- `banc_meta_create_cache(source = "seatable")` — pulls the draft
+  `banc_meta` SeaTable. **BANC production team only.** All other
+  `banctable_*` functions in this package sit behind the same
+  authenticated SeaTable and are not relevant to the general user; they
+  exist to support the small group of people producing BANC annotations.
+
+[`franken_meta()`](https://natverse.github.io/bancr/reference/banctable_query.md)
+follows the same convention: by default it reads the public per-dataset
+feathers (`compiled_data/fafb_783/fafb_783_meta.feather`,
+`compiled_data/manc_121/manc_121_meta.feather`, etc.), column-unions
+them, and never touches SeaTable.
+
 ## Quick Start Examples
 
 Here’s how to get started with analyzing descending neurons (DNs) that

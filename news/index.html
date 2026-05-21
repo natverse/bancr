@@ -29,9 +29,24 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/natverse/bancr/blob/v0.3.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/natverse/bancr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.2" id="bancr-032-development">bancr 0.3.2 (development)<a class="anchor" aria-label="anchor" href="#bancr-032-development"></a></h2>
+<ul><li>
+<code><a href="../reference/banc_meta_create_cache.html">banc_meta_create_cache()</a></code> now defaults to <code>source = "gcs"</code>, reading the public compiled meta feather at <code>gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/banc_888/banc_888_meta.feather</code>. This needs no BANC authentication and avoids the slow CAVE union of <code><a href="../reference/banc_cave_tables.html">banc_cell_info()</a></code> + <code><a href="../reference/banc_codex_annotations.html">banc_codex_annotations()</a></code>.
+<ul><li>
+<code>source = "cave"</code> keeps the previous CAVE-derived behaviour for callers who need labels fresher than the GCS snapshot.</li>
+<li>
+<code>source = "seatable"</code> reads the draft <code>banc_meta</code> SeaTable and is restricted to the BANC production team. The dead SQL bug in this branch (renaming <code>super_class</code> despite never selecting it) is fixed.</li>
+<li>The <code>use_seatable</code> argument is kept as a deprecated alias.</li>
+</ul></li>
+<li>
+<code><a href="../reference/banctable_query.html">franken_meta()</a></code> likewise defaults to <code>source = "gcs"</code>, reading per-dataset compiled feathers from <code>compiled_data/&lt;slug&gt;/&lt;slug&gt;_meta.feather</code> (<code>fafb_783</code>, <code>manc_121</code>, <code>hemibrain_121</code>, <code>malecns_09</code>). <code>source = "seatable"</code> (formerly the <code>"split"</code> default) and <code>source = "legacy"</code> remain for production-team callers.</li>
+<li>New internal helper <code>banc_gcs_meta_feather()</code> (downloads + caches a compiled meta feather under <code>tools::R_user_dir("bancr", "cache")</code>). Adds a soft dependency on the <code>arrow</code> package, already in <code>Suggests</code>.</li>
+<li>README: new “Getting BANC meta data” section advertising the GCS feather as the main route for almost all users, and clarifying that the <code>banctable_*</code> family is for the BANC production team only.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="bancr-031">bancr 0.3.1<a class="anchor" aria-label="anchor" href="#bancr-031"></a></h2>
 <ul><li>Repository moved from <code>flyconnectome/bancr</code> to <code>natverse/bancr</code>. The old URL continues to redirect, but please update local clones with <code>git remote set-url origin git@github.com:natverse/bancr.git</code> and any <code>Remotes:</code> lines in downstream packages.</li>

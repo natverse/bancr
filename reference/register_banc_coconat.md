@@ -40,8 +40,9 @@ register_banc_coconat()
 
 # once per session or if you think there have been updates
 banc_meta_create_cache()
-# use_seatable if you have access/want the bleeding edge
-banc_meta_create_cache(use_seatable=TRUE)
+# source = "seatable" if you are on the BANC production team and want
+# the bleeding-edge draft labels (needs BANCTABLE_TOKEN)
+banc_meta_create_cache(source = "seatable")
 
 # examples of within dataset analysis
 dna02meta <- cf_meta(cf_ids(banc='/DNa02'))

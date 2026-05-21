@@ -21,16 +21,16 @@ When `invert=TRUE` (unarchive), it moves specific rows by row_id from
 big data storage back to normal backend. Note: The big data backend must
 be enabled in your base for these functions to work.
 
-The cns_meta base holds the BANC project's reformulated views of each
-external connectome's meta-data — FAFB-FlyWire, MANC, Hemibrain and
-maleCNS. Each source dataset's per-neuron records have been re-keyed
-into BANC's annotation scheme (the same `flow` / `super_class` /
-`cell_class` / `cell_sub_class` / `cell_type` / `hemilineage` / `region`
-/ `nerve` / `neuromere` / function / body_part / neurochemistry
-vocabularies banc_meta uses), so each row can be compared directly
-against the corresponding BANC neuron. Source-specific identifiers and
-labels are retained alongside the BANC-shaped columns (e.g.
-`FAFB_cell_type`, `MANC_class`).
+`franken_meta()` returns the BANC project's reformulated views of each
+external connectome (FAFB-FlyWire, MANC, Hemibrain and maleCNS),
+re-keyed into BANC's annotation scheme (the same `flow` / `super_class`
+/ `cell_class` / `cell_sub_class` / `cell_type` / `hemilineage` /
+`region` / `nerve` / `neuromere` / function / body_part / neurochemistry
+vocabularies
+[`banc_meta()`](https://natverse.github.io/bancr/reference/banc_meta.md)
+uses). Each row can be compared directly against the corresponding BANC
+neuron; source-specific identifiers and labels are retained alongside
+the BANC-shaped columns.
 
 ## Usage
 
@@ -86,9 +86,10 @@ banctable_move_to_bigdata(
 
 franken_meta(
   tables = c("fafb", "manc"),
+  source = c("gcs", "seatable", "legacy"),
+  overwrite = FALSE,
   sql = NULL,
   base = "cns_meta",
-  source = c("split", "legacy"),
   ...
 )
 
@@ -109,8 +110,8 @@ banctable_append_rows(
 - sql:
 
   Optional. If supplied, bypasses the table-union logic and passes the
-  SQL verbatim to `banctable_query()`. Mainly used to query the
-  (still-extant) legacy `franken_meta` table directly, e.g.
+  SQL verbatim to `banctable_query()`. Mainly used to query a SeaTable
+  table directly, e.g.
   `franken_meta(sql = "SELECT * FROM franken_meta")`.
 
 - limit:
@@ -121,7 +122,8 @@ banctable_append_rows(
 
 - base:
 
-  SeaTable base name. Defaults to `"cns_meta"`.
+  SeaTable base name (only used when `source` is `"seatable"` or
+  `"legacy"`). Defaults to `"cns_meta"`.
 
 - python:
 
@@ -187,7 +189,7 @@ banctable_append_rows(
 
 - ...:
 
-  Passed to `banctable_query()`.
+  Passed to `banctable_query()` when reading from SeaTable.
 
 - view_name:
 
@@ -222,16 +224,18 @@ banctable_append_rows(
 
   Character vector of source tables to read and append. Any combination
   of `"fafb"`, `"manc"`, `"hemibrain"`, `"malecns"`. Defaults to
-  `c("fafb", "manc")` — the FAFB+MANC union, which is the closest
-  equivalent to the historical `franken_meta` table.
+  `c("fafb", "manc")` — the FAFB+MANC union, the closest equivalent to
+  the historical single `franken_meta` table.
 
 - source:
 
-  Optional shortcut. `"split"` (default, post-migration) reads the
-  per-source `tables` and unions them; `"legacy"` reads the original
-  single `franken_meta` table (retained as a backup until the split is
-  fully verified — it is no longer the source of truth as of the
-  2026-05-15 migration).
+  `"gcs"` (default, public feathers), `"seatable"` (BANC production team
+  only) or `"legacy"` (deprecated single SeaTable).
+
+- overwrite:
+
+  Logical. If `TRUE` and `source = "gcs"`, re-download the cached
+  feathers even if they already exist.
 
 - bigdata:
 
@@ -246,22 +250,35 @@ a `data.frame` of results. There should be 0 rows if no rows matched
 query.
 
 A data frame with one row per neuron across the chosen source tables.
-Columns are the union of the requested tables' schemas; rows from a
-table missing a given column carry `NA` for that column. When more than
-one source table is read, a unified `neuron_id` column is added: each
-row carries the ID from its originating table's per-source ID column
-(`fafb_id`, `manc_id`, `hemibrain_121_id`, or `malecns_09_id`),
+When more than one source table is read, a unified `neuron_id` column is
+added: each row carries the ID from its originating table's per-source
+ID column (`fafb_id` / `fafb_783_id`, `manc_id` / `manc_121_id`,
+`hemibrain_id` / `hemibrain_121_id`, `malecns_id` / `malecns_09_id`),
 coalesced into the single `neuron_id`. The original per-source ID
 columns are preserved.
 
 ## Details
 
-The historical single-table `franken_meta` is being phased out in favour
-of four separable per-source tables: `fafb`, `manc`, `hemibrain`,
-`malecns`. The new tables don't all carry exactly the same column set
-(FAFB\_\* columns only in `fafb`, MANC\_\* only in `manc`, and so on) —
+Two sources of these tables are supported. The default `"gcs"` reads
+per-dataset feathers from the public bucket at
+`gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/<slug>/<slug>_meta.feather`
+(slugs `fafb_783`, `manc_121`, `hemibrain_121`, `malecns_09`). No
+authentication is required and the feathers are cached locally under
+`tools::R_user_dir("bancr", "cache")`. This is the recommended path for
+almost all users.
+
+The `"seatable"` source is restricted to the BANC production team and
+reads the in-progress per-source SeaTable tables (`fafb`, `manc`,
+`hemibrain`, `malecns`) in the `cns_meta` base via `banctable_query()`.
+It requires a valid `BANCTABLE_TOKEN`. The `"legacy"` source reads the
+single, deprecated `franken_meta` SeaTable as a backup; it is no longer
+the source of truth post-2026-05-15.
+
+When multiple `tables` are requested,
 [`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
-is used to take the column-union when reading more than one.
+takes the column-union; FAFB\_*, MANC\_*, hemibrain-specific and
+malecns-specific columns survive only on the rows that come from the
+table that owns them.
 
 ## See also
 
@@ -312,7 +329,7 @@ banctable_append_rows(
 )
 } # }
 if (FALSE) { # \dontrun{
-# Default: FAFB + MANC union (closest equivalent to old franken_meta)
+# Default: FAFB + MANC union read from the public GCS feathers.
 fk <- franken_meta()
 
 # Only the FAFB rows
@@ -321,7 +338,13 @@ fafb <- franken_meta(tables = "fafb")
 # All four source tables, column-unioned
 all <- franken_meta(tables = c("fafb", "manc", "hemibrain", "malecns"))
 
-# Legacy single-table read (still available until decommission)
+# Force a fresh download of the cached feathers
+fk_fresh <- franken_meta(overwrite = TRUE)
+
+# BANC production team: pull the in-progress SeaTable instead.
+fk_st <- franken_meta(source = "seatable")
+
+# Legacy single-table SeaTable read (deprecated; still available)
 legacy <- franken_meta(source = "legacy")
 } # }
 ```

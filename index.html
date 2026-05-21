@@ -84,10 +84,37 @@
 <p>This dataset enables important research into: - <strong>Sensorimotor integration</strong>: How sensory information is processed and translated into motor commands - <strong>Distributed neural computation</strong>: How the brain and nerve cord share computational load - <strong>Behavioural circuit analysis</strong>: Mapping complete neural pathways underlying specific behaviours - <strong>Comparative connectomics</strong>: Understanding how nervous system organisation relates to behavioural complexity</p>
 </div>
 <div class="section level2">
+<h2 id="getting-banc-meta-data">Getting BANC meta data<a class="anchor" aria-label="anchor" href="#getting-banc-meta-data"></a>
+</h2>
+<p>For nearly all users, the recommended way to get BANC neuron metadata is the <strong>public compiled meta feather</strong> that ships in the lee-lab GCS bucket:</p>
+<pre><code>gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/banc_888/banc_888_meta.feather</code></pre>
+<p>That one file (~55 MB) is a harmonised per-neuron table of ~188 k rows × 75 columns — root IDs, soma side, the full BANC annotation hierarchy (<code>flow</code> / <code>super_class</code> / <code>cell_class</code> / <code>cell_sub_class</code> / <code>cell_type</code>), cross-dataset matches (<code>fafb_*</code>, <code>manc_*</code>, <code>hemibrain_*</code>, <code>malecns_*</code>, <code>fanc_*</code>), neurotransmitter predictions, hemilineage, neuropil membership and more. Schema details are in the <a href="https://github.com/sjcabs/fly_connectome_data_tutorial/tree/main/data/dataset_documentation" class="external-link">dataset documentation</a>.</p>
+<p><code>bancr</code> wraps it for you:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/natverse/bancr" class="external-link">bancr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Download (one-time, cached) and load the compiled meta feather.</span></span>
+<span><span class="co"># No CAVE / SeaTable authentication is needed for this path.</span></span>
+<span><span class="fu"><a href="reference/banc_meta_create_cache.html">banc_meta_create_cache</a></span><span class="op">(</span><span class="op">)</span>        <span class="co"># source = "gcs" is the default</span></span>
+<span></span>
+<span><span class="co"># Quick lookups against the in-memory cache</span></span>
+<span><span class="va">all_meta</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_meta.html">banc_meta</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">dna02_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_meta.html">banc_meta</a></span><span class="op">(</span>ids <span class="op">=</span> <span class="st">"/type:DNa02"</span><span class="op">)</span></span></code></pre></div>
+<p>The <code><a href="reference/banc_meta.html">banc_meta()</a></code> accessor returns the 6 canonical columns used by <a href="https://natverse.org/coconatfly/" class="external-link">coconatfly</a> (<code>id</code>, <code>class</code>, <code>type</code>, <code>side</code>, <code>subclass</code>, <code>subsubclass</code>). To work with the full 75-column feather directly, point <code><a href="https://arrow.apache.org/docs/r/reference/read_feather.html" class="external-link">arrow::read_feather()</a></code> at the URL above.</p>
+<p>Two alternative sources are available for advanced users:</p>
+<ul>
+<li>
+<code>banc_meta_create_cache(source = "cave")</code> — live read from <code><a href="reference/banc_cave_tables.html">banc_cell_info()</a></code> + <code><a href="reference/banc_codex_annotations.html">banc_codex_annotations()</a></code> (needs BANC CAVE access). Use this when you need labels fresher than the latest GCS snapshot.</li>
+<li>
+<code>banc_meta_create_cache(source = "seatable")</code> — pulls the draft <code>banc_meta</code> SeaTable. <strong>BANC production team only.</strong> All other <code>banctable_*</code> functions in this package sit behind the same authenticated SeaTable and are not relevant to the general user; they exist to support the small group of people producing BANC annotations.</li>
+</ul>
+<p><code><a href="reference/banctable_query.html">franken_meta()</a></code> follows the same convention: by default it reads the public per-dataset feathers (<code>compiled_data/fafb_783/fafb_783_meta.feather</code>, <code>compiled_data/manc_121/manc_121_meta.feather</code>, etc.), column-unions them, and never touches SeaTable.</p>
+</div>
+<div class="section level2">
 <h2 id="quick-start-examples">Quick Start Examples<a class="anchor" aria-label="anchor" href="#quick-start-examples"></a>
 </h2>
 <p>Here’s how to get started with analyzing descending neurons (DNs) that connect brain to nerve cord in the fly connectome:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/natverse/bancr" class="external-link">bancr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -222,10 +249,10 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the development version of <code>bancr</code> from github:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'natverse/bancr'</span><span class="op">)</span></span></code></pre></div>
 <p>To do anything useful with the bancr package, you need authorisation to access banc resources - anyone can ask for access <a href="https://flywire.ai/banc_access" class="external-link">here</a>. To prove your authorisation for programmatic access you must generate and store a token in your web browser after logging in to an approved Google account. This should be streamlined by running the following command in R (which will also set you up for Pythonic access via cloudvolume).</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># set up token - will open your browser to generate a new token</span></span>
 <span><span class="fu"><a href="reference/banc_set_token.html">banc_set_token</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -233,7 +260,7 @@
 <span><span class="co"># if you already have one do </span></span>
 <span><span class="co"># banc_set_token("&lt;my token&gt;")</span></span></code></pre></div>
 <p>To check that everything is set up properly, try:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># diagnose issues</span></span>
 <span><span class="fu"><a href="reference/dr_banc.html">dr_banc</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -243,7 +270,7 @@
 <pre><code><span><span class="fu">fafbseg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fafbseg/man/simple_python.html" class="external-link">simple_python</a></span><span class="op">(</span><span class="st">"full"</span><span class="op">)</span></span></code></pre>
 <p>Note that this package is designed to play nicely with <code>fafbseg</code>, which has been used mainly for the <em>FAFB-FlyWire</em> project, but could be used to work with data from many neuroglancer/CAVE based projects.</p>
 <p>If you get an error related to not finding cloud-volume or the cloud-volume version, the solution may be to update cloud-volume, as so:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fafbseg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fafbseg/man/simple_python.html" class="external-link">simple_python</a></span><span class="op">(</span><span class="st">'none'</span>, pkgs<span class="op">=</span><span class="st">'cloud-volume~=8.32.1'</span><span class="op">)</span></span>
 <span><span class="fu">fafbseg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fafbseg/man/simple_python.html" class="external-link">simple_python</a></span><span class="op">(</span><span class="st">'none'</span>, pkgs<span class="op">=</span><span class="st">'caveclient~=8.0.0'</span><span class="op">)</span></span></code></pre></div>
 <p>Use <code><a href="reference/choose_banc.html">with_banc()</a></code> to wrap many additional <code>fafbseg::flywire_*</code> functions for use with the <em>BANC</em>. Alternatively <code><a href="reference/choose_banc.html">choose_banc()</a></code> to set all <code>flywire_*</code> functions from <code>fafbseg</code> to target the <em>BANC</em>. Not all functions will work.</p>
@@ -251,10 +278,10 @@
 <h3 id="updating">Updating<a class="anchor" aria-label="anchor" href="#updating"></a>
 </h3>
 <p>You can just repeat the install instructions, but this ensures that all dependencies are updated:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'natverse/bancr'</span><span class="op">)</span></span></code></pre></div>
 <p>If you need to update a specific Python library dependent, you can do:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fafbseg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/fafbseg/man/simple_python.html" class="external-link">simple_python</a></span><span class="op">(</span>pkgs<span class="op">=</span><span class="st">'fafbseg'</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -265,7 +292,7 @@
 <h3 id="load-the-code-we-need">Load the code we need<a class="anchor" aria-label="anchor" href="#load-the-code-we-need"></a>
 </h3>
 <p>First we need to load the package, and direct ourselves to the <em>BANC</em> data set.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/natverse/bancr" class="external-link">bancr</a></span><span class="op">)</span></span>
 <span><span class="co"># choose_banc()</span></span></code></pre></div>
 </div>
@@ -273,7 +300,7 @@
 <h3 id="identify-the-neurons-we-care-about">Identify the neurons we care about<a class="anchor" aria-label="anchor" href="#identify-the-neurons-we-care-about"></a>
 </h3>
 <p>Next, let us query a <em>BANC</em> CAVE table in order to get the neurons users have annotated as ‘ascending’ neurons, i.e. neurons that have their cell bodies and dendrites in the ventral nerve cord, and their axons in the brain.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">banc.neck.connective.neurons</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_cave_tables.html">banc_neck_connective_neurons</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">banc.neck.connective.neurons</span><span class="op">)</span></span></code></pre></div>
 <p>After considering these neurons, I have decided I would like to plot two of them. They are both members of the same cell type. They are identified by a 16-bit <code>root_id</code>.</p>
@@ -296,17 +323,17 @@
 <h3 id="obtain-neuron-segmentation-data">Obtain neuron segmentation data<a class="anchor" aria-label="anchor" href="#obtain-neuron-segmentation-data"></a>
 </h3>
 <p>Great. Next, we want to read the mesh objects of our neurons.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">an1.left.mesh</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_neuron_meshes.html">banc_read_neuron_meshes</a></span><span class="op">(</span><span class="va">an1.left</span><span class="op">)</span></span>
 <span><span class="va">an1.right.mesh</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_neuron_meshes.html">banc_read_neuron_meshes</a></span><span class="op">(</span><span class="va">an1.right</span><span class="op">)</span></span></code></pre></div>
 <p>These neurons will be in ‘<em>BANC</em> coordinates’, in nanometers. They are read as <code>mesh3d</code> objects which describe triangular meshes.</p>
 <p>But we can also get proxy ‘L2’ skeletons from the segmentation graph for each neuron.</p>
 <p>These functions depend on Philipp Schlegel’s <code>fafbseg-py</code> library. You can install this using <code><a href="https://rdrr.io/pkg/fafbseg/man/simple_python.html" class="external-link">fafbseg::simple_python</a></code>. See above.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">an1.left.skel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_l2dp.html">banc_read_l2skel</a></span><span class="op">(</span><span class="va">an1.left</span><span class="op">)</span></span>
 <span><span class="va">an1.right.skel</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_l2dp.html">banc_read_l2skel</a></span><span class="op">(</span><span class="va">an1.right</span><span class="op">)</span></span></code></pre></div>
 <p>We can also get <code>mesh3d</code> objects for our nuclei.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">an1.left.nucleus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_neuron_meshes.html">banc_read_nuclei_mesh</a></span><span class="op">(</span><span class="va">banc.nuclei.an1.ids</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">an1.right.nucleus</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_read_neuron_meshes.html">banc_read_nuclei_mesh</a></span><span class="op">(</span><span class="va">banc.nuclei.an1.ids</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -315,15 +342,15 @@
 </h3>
 <p>We can plot our neurons in 3D using the <code>rgl</code> package.</p>
 <p>First, we can plot the <em>BANC</em> volume mesh which shows all the brain tissue.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">nopen3d</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/banc_view.html">banc_view</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">plot3d</span><span class="op">(</span><span class="va">banc.surf</span>, col <span class="op">=</span> <span class="st">"lightgrey"</span>, alpha <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></code></pre></div>
 <p>We can also see the synaptic neuropil inside of it.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plot3d</span><span class="op">(</span><span class="va">banc_neuropil.surf</span>, col <span class="op">=</span> <span class="st">"lightgrey"</span>, alpha <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></code></pre></div>
 <p>And now our neurons, their skeletons and their nuclei.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot neuron meshes</span></span>
 <span><span class="fu">plot3d</span><span class="op">(</span><span class="va">an1.left.mesh</span>, col <span class="op">=</span> <span class="st">"coral"</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
 <span><span class="fu">plot3d</span><span class="op">(</span><span class="va">an1.right.mesh</span>, col <span class="op">=</span> <span class="st">"chartreuse"</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span></span>
@@ -339,7 +366,7 @@
 <img src="https://github.com/natverse/bancr/blob/main/inst/images/banc_an1.png?raw=true" alt="banc_an1"><div class="figcaption">banc_an1</div>
 </div>
 <p>We can also make a 2D image of multiple views using <code>ggplot2</code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Simplify meshes to  make plotting faster</span></span>
 <span><span class="va">banc_neuropil</span> <span class="op">&lt;-</span> <span class="fu">Rvcg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Rvcg/man/vcgQEdecim.html" class="external-link">vcgQEdecim</a></span><span class="op">(</span><span class="fu">as.mesh3d</span><span class="op">(</span><span class="va">banc_neuropil.surf</span><span class="op">)</span>, percent <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">banc_brain_neuropil</span> <span class="op">&lt;-</span> <span class="fu">Rvcg</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Rvcg/man/vcgQEdecim.html" class="external-link">vcgQEdecim</a></span><span class="op">(</span><span class="fu">as.mesh3d</span><span class="op">(</span><span class="va">banc_brain_neuropil.surf</span><span class="op">)</span>, percent <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
@@ -371,11 +398,11 @@
 <div class="float">
 <img src="https://github.com/natverse/bancr/blob/main/inst/images/banc_neuropil_mirrored.png?raw=true" alt="banc_neuropil_mirrored"><div class="figcaption">banc_neuropil_mirrored</div>
 </div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">an1.left.skel.m</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_mirror.html">banc_mirror</a></span><span class="op">(</span><span class="va">an1.left.skel</span>, method <span class="op">=</span> <span class="st">"tpsreg"</span><span class="op">)</span></span>
 <span><span class="va">an1.right.skel.m</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_mirror.html">banc_mirror</a></span><span class="op">(</span><span class="va">an1.right.skel</span>, , method <span class="op">=</span> <span class="st">"tpsreg"</span><span class="op">)</span></span></code></pre></div>
 <p>And now plot the mirrored skeletons, and the non-mirrored meshes for comparison:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up 3D plot</span></span>
 <span><span class="fu">nopen3d</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/banc_view.html">banc_view</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -392,13 +419,13 @@
 <img src="https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored.png?raw=true" alt="banc_ans_mirrored"><div class="figcaption">banc_ans_mirrored</div>
 </div>
 <p>We can also change the view to see, for example, the brain more clearly.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/banc_view.html">banc_front_view</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored_brain.png?raw=true" alt="banc_ans_mirrored_brain"><div class="figcaption">banc_ans_mirrored_brain</div>
 </div>
 <p>Or the ventral nerve cord.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/banc_view.html">banc_vnc_view</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="https://github.com/natverse/bancr/blob/main/inst/images/banc_ans_mirrored_vnc.png?raw=true" alt="banc_ans_mirrored_vnc"><div class="figcaption">banc_ans_mirrored_vnc</div>
@@ -410,7 +437,7 @@
 <p><a href="https://people.epfl.ch/jasper.phelps/?lang=en" class="external-link">Jasper Phelps</a> has made a <em>BANC</em>-to-JRC2018F and JRC2018F-to-<em>BANC</em> transform using the software <a href="https://elastix.dev/download.php" class="external-link">Elastix</a>. Therefore, we can use this transform to move data transformed first into <code>JRC2018F</code>, into the <em>BANC</em>. Or data out of the <em>BANC</em>, into <code>JRC2018</code> and then any other template brain to which <code>JRC2018F</code> can be bridged.</p>
 <p>We can either use the Elastix transform directly if you have Elastix installed on your machine (implemented as <code>method="elastix"</code>). This can be a bit of a journey, so I have also implemented a <a href="https://rdrr.io/cran/Morpho/man/computeTransform.html" class="external-link">thin plate spine registration</a> that is based on the Elastix transform, made and applied using the R package <code>Morpho</code> (implemented as <code>method="tpsreg"</code>) . The end result of the two methods can be very slightly different.</p>
 <p>Firstly, let’s just take the brain part of the ANs we have, as <code>JRC2018F</code> only include the brain.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Show only the portion in the brain</span></span>
 <span><span class="va">an1.mesh.simp</span> <span class="op">&lt;-</span> <span class="fu">neuronlist</span><span class="op">(</span><span class="va">an1.left.mesh.simp</span>, <span class="va">an1.right.mesh.simp</span><span class="op">)</span></span>
 <span><span class="va">an1.mesh.simp.brain</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_decapitate.html">banc_decapitate</a></span><span class="op">(</span><span class="va">an1.mesh.simp</span>, invert <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -429,7 +456,7 @@
 </div>
 <p>We can now read a neuron from <em>FAFB-FlyWire</em>. I already know the ID of the comparable <em>FAFB-FlyWire</em> neurons to fetch.</p>
 <p>We need to load a new R package first.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'natverse/nat.jrcbrains'</span><span class="op">)</span></span>
 <span></span>
@@ -438,7 +465,7 @@
 <span><span class="co">## You may need to download the relevant registration, if you have not already:</span></span>
 <span><span class="co"># download_saalfeldlab_registrations()</span></span></code></pre></div>
 <p>And then get known <em>FAFB-FlyWire</em> neurons.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## if you previously ran choose_banc()</span></span>
 <span><span class="co">## now run: </span></span>
 <span><span class="co"># choose_segmentation("flywire31")</span></span>
@@ -462,13 +489,13 @@
 </div>
 <p>We can do the same with the <em>Hemibrain</em>.</p>
 <p>We need to load a new R package first.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">'natverse/hemibrainr'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">hemibrainr</span><span class="op">)</span></span></code></pre></div>
 <p>And now we can get the equivalent <em>Hemibrain</em> neuron.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Read hemibrain neuron</span></span>
 <span><span class="va">hb.an1</span> <span class="op">&lt;-</span> <span class="st">"706176085"</span></span>
 <span></span>
@@ -486,7 +513,7 @@
 <p>Now we see all related neurons from three data sets in one space. Awesome!</p>
 <p>We can also see the difference between the Elastix registration and the <code>Morpho</code> based on.</p>
 <p>You will first need to download and install Elastix. To do so, you can follow the instructions <a href="https://elastix.dev/download/elastix-5.1.0-manual.pdf" class="external-link">here</a>. Remember that the Elastix binaries must be on your <code>PATH</code> and your system must be able to see its libraries. On MacOSX it is tricky to just install and use the <a href="https://github.com/SuperElastix/elastix/releases" class="external-link">Elastix binaries directly</a>, you need instead to compile ITK then Elastix yourself.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Transform with Elastix</span></span>
 <span><span class="va">an1.mesh.simp.brain.jrc2018f.elastix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_to_JRC2018F.html">banc_to_JRC2018F</a></span><span class="op">(</span><span class="va">an1.mesh.simp.brain</span>,</span>
 <span>                                                  method <span class="op">=</span> <span class="st">"elastix"</span>,</span>
@@ -501,7 +528,7 @@
 <div class="section level3">
 <h3 id="get-neurons-connectivity">Get neurons connectivity<a class="anchor" aria-label="anchor" href="#get-neurons-connectivity"></a>
 </h3>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">an.upstream</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_partner_summary.html">banc_partner_summary</a></span><span class="op">(</span><span class="va">an1.ids</span>, partners <span class="op">=</span> <span class="st">"input"</span><span class="op">)</span></span>
 <span><span class="va">an.downstream</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/banc_partner_summary.html">banc_partner_summary</a></span><span class="op">(</span><span class="va">an1.ids</span>, partners <span class="op">=</span> <span class="st">"output"</span><span class="op">)</span></span>
 <span></span>
@@ -533,7 +560,7 @@
 <h2 id="acknowledging-the-data-and-tools">Acknowledging the data and tools<a class="anchor" aria-label="anchor" href="#acknowledging-the-data-and-tools"></a>
 </h2>
 <p>BANC data needs to be acknowledged in accordance to the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community guidelines</a> and in agreement with the BANC consortium. If you use this package, please cite the BANC paper <a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link">(Bates et al. 2025)</a> and our <em>natverse</em> paper <a href="https://elifesciences.org/articles/53350" class="external-link">(Bates et al. 2020)</a> in addition to the R package itself:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"bancr"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Bates A, Jefferis G</strong> (2025). <em>bancr: R Client Access to the Brain And Nerve Cord (BANC) Dataset</em>. R package version 0.3.0, <a href="https://github.com/natverse/bancr" class="external-link uri">https://github.com/natverse/bancr</a>.</p>
 </div>

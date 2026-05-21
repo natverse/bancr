@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/natverse/bancr/blob/v0.3.1/inst/CITATION)
+[`inst/CITATION`](https://github.com/natverse/bancr/blob/main/inst/CITATION)
 
 Bates AS, Phelps JS, Kim M, Yang HSJ, Matsliah A, Ajabi Z, Perlman E, et
 al. (2025). Distributed control circuits across a brain-and-cord
