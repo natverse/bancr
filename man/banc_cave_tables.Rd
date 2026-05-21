@@ -21,10 +21,10 @@ banc_cave_tables(datastack_name = NULL, select = NULL)
 banc_cave_views(datastack_name = NULL, select = NULL)
 
 banc_edgelist(
-  edgelist_view = c("synapses_v2_backbone_proofread_and_peripheral_nerves_counts",
-    "synapses_v2_backbone_proofread_counts",
-    "synapses_250226_backbone_proofread_and_peripheral_nerves_counts",
-    "synapses_250226_backbone_proofread_counts", "synapses_v1_backbone_proofread_counts"),
+  version = c("v2", "v3"),
+  source = c("gcs", "cave"),
+  overwrite = FALSE,
+  edgelist_view = NULL,
   ...
 )
 
@@ -75,7 +75,18 @@ banc_version()
 
 \item{select}{A regex term for the name of the table you want}
 
-\item{edgelist_view}{Character, name of prepared CAVE view that computes the proofread-neuron edgelist.}
+\item{version}{Character, \code{"v2"} (default, paper synapses) or
+\code{"v3"} (updated synapses, still in testing).}
+
+\item{source}{\code{"gcs"} (default; reads the public compiled
+feather) or \code{"cave"} (live materialised view query).}
+
+\item{overwrite}{Logical. If \code{TRUE} and \code{source = "gcs"},
+re-download the cached feather.}
+
+\item{edgelist_view}{Optional CAVE view name override (only honoured
+when \code{source = "cave"}). Defaults are derived from
+\code{version}: \code{synapses_v<version>_backbone_proofread_and_peripheral_nerves_counts}.}
 
 \item{...}{Additional arguments passed to
 \code{\link[fafbseg]{flywire_cave_query}} or \code{bancr:::get_cave_table_data}.}
@@ -122,6 +133,29 @@ the pre (presynaptic) neuron is upstream of the post (postsynaptic) neuron.
 This edgelist contains synaptic connectivity data crucial for understanding
 distributed neural control and behaviour-centric neural modules across the
 brain-VNC boundary.
+
+Two synapse-table versions are exposed via the \code{version} argument:
+\code{"v2"} (default) is the paper-version edgelist built from CAVE
+\code{synapses_v2}; \code{"v3"} is the updated/refined synapse table
+(CAVE \code{synapses_v3}, still in testing — see \code{\link[=banc_all_synapses]{banc_all_synapses()}}).
+The two sources differ slightly in coverage; for most analyses
+\code{"v3"} is the closer-to-current snapshot and \code{"v2"} matches
+the published numbers.
+
+Two backing stores are supported via the \code{source} argument:
+\code{"gcs"} (default) reads the pre-computed compiled feather at
+\code{gs://lee-lab_brain-and-nerve-cord-fly-connectome/compiled_data/banc_888/banc_888_edgelist_simple_<version>.feather}
+from the public bucket — no BANC authentication needed, ~285 MB
+download for \code{v2} / ~336 MB for \code{v3}, cached locally under
+\code{tools::R_user_dir("bancr", "cache")}. The returned schema is
+\code{pre, post, count, norm, post_count, pre_count}.
+
+\code{source = "cave"} runs a live materialised CAVE view query (the
+previous default). Requires authenticated CAVE access; the returned
+schema includes \code{pre_pt_root_id}, \code{post_pt_root_id} and
+\code{n}. Use this when you need labels fresher than the latest GCS
+snapshot or want to override the materialisation timestamp via
+\code{...}.
 
 \code{banc_cell_info} accesses the cell_info CAVE table containing non-centralised
 annotations from the research community for connectome neurones. These annotations

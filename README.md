@@ -106,16 +106,21 @@ dna02_neurons <- annotations %>%
 # Extract their root IDs
 dna02_ids <- dna02_neurons$pt_root_id
 
-# Get connectivity data for these neurons
-## This is a large download, may take ~10-20 mins
+# Get connectivity data for these neurons.
+# Default reads the compiled v2 edgelist from public GCS (~285 MB,
+# one-time cached download). Use version = "v3" for the updated
+# synapse table, or source = "cave" for a live CAVE query (auth needed).
 el <- banc_edgelist()
 
-# Subset connectivity by our neurons of interest
+# Subset connectivity by our neurons of interest. The GCS edgelist
+# uses `pre` / `post` / `count`; the CAVE source uses `pre_pt_root_id`
+# / `post_pt_root_id` / `n`.
 dna02_connections <- el %>%
-  filter(pre_pt_root_id %in% dna02_ids)
+  filter(pre %in% dna02_ids)
 
-# Visualize connection strength distribution
-ggplot(dna02_connections, aes(x = n)) +
+# Visualize connection strength distribution (column is `count` from GCS,
+# `n` from CAVE — rename if you swap sources).
+ggplot(dna02_connections, aes(x = count)) +
   geom_histogram(binwidth = 1, alpha = 0.7, color = "black", fill = "steelblue") +
   labs(title = "Connection Strength Distribution for DNa02 Neurons",
        x = "Number of Synapses",

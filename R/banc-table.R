@@ -622,6 +622,24 @@ franken_meta <- function(tables = c("fafb", "manc"),
     })
   }
   if (length(parts) == 1L) return(parts[[1]])
+  # Per-dataset feathers occasionally diverge on column type (e.g.
+  # neurotransmitter_score is character in fafb_783 / hemibrain_121 but
+  # double in manc_121 / malecns_09), which bind_rows() refuses to
+  # combine. Coerce any column whose type differs across the parts to
+  # character before unioning, then bind.
+  all_cols <- unique(unlist(lapply(parts, names)))
+  for (col in all_cols) {
+    types <- unique(vapply(parts, function(p) {
+      if (col %in% names(p)) class(p[[col]])[1] else NA_character_
+    }, character(1)))
+    types <- types[!is.na(types)]
+    if (length(types) > 1L) {
+      parts <- lapply(parts, function(p) {
+        if (col %in% names(p)) p[[col]] <- as.character(p[[col]])
+        p
+      })
+    }
+  }
   combined <- dplyr::bind_rows(parts)
   # Each source table has its own per-row ID column. Coalesce them into
   # a single `neuron_id` so callers can key rows uniformly across sources.
