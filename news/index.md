@@ -2,6 +2,19 @@
 
 ## bancr 0.3.2 (development)
 
+- [`banc_edgelist()`](https://natverse.github.io/bancr/reference/banc_cave_tables.md)
+  now defaults to `source = "gcs"`, reading the pre-computed
+  `compiled_data/banc_888/banc_888_edgelist_simple_<version>.feather`
+  from the public bucket (no auth needed; ~285 MB for v2, ~336 MB for
+  v3, cached locally). New `version = c("v2", "v3")` argument selects
+  paper-version synapses (`v2`, default) vs the updated `synapses_v3`
+  edgelist. `source = "cave"` preserves the previous CAVE materialised
+  view query for callers who need live data; the auto-derived view name
+  is
+  `synapses_<version>_backbone_proofread_and_peripheral_nerves_counts`,
+  overridable via `edgelist_view`. Returned schema follows the source:
+  `pre, post, count, norm, post_count, pre_count` from GCS;
+  `pre_pt_root_id, post_pt_root_id, n` from CAVE.
 - [`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md)
   now defaults to `source = "gcs"`, reading the public compiled meta
   feather at
