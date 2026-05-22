@@ -1,6 +1,6 @@
 # Changelog
 
-## bancr 0.3.2 (development)
+## bancr 0.3.2
 
 - CAVE-table accessors now default to a public GCS snapshot
   (`neuron_annotations/v888/*.parquet`). Each of

@@ -42,13 +42,13 @@ doi:10.7554/eLife.53350.
     }
 
 Bates A, Jefferis G (2026). bancr: R Client Access to the Brain And
-Nerve Cord (BANC) Dataset. R package version 0.3.1,
+Nerve Cord (BANC) Dataset. R package version 0.3.2,
 https://github.com/natverse/bancr.
 
     @Manual{,
       title = {bancr: R Client Access to the Brain And Nerve Cord (BANC) Dataset},
       author = {Alexander Shakeel Bates and Gregory S. X. E. Jefferis},
       year = {2026},
-      note = {R package version 0.3.1},
+      note = {R package version 0.3.2},
       url = {https://github.com/natverse/bancr},
     }
