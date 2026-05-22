@@ -5,20 +5,55 @@
   "upload_type": "software",
   "access_right": "open",
   "creators": [
-    {"name": "Bates, Alexander Shakeel", "orcid": "0000-0002-1195-0445", "affiliation": "Harvard Medical School"},
-    {"name": "Jefferis, Gregory S. X. E.", "orcid": "0000-0002-0587-9355", "affiliation": "MRC Laboratory of Molecular Biology"}
+    {
+      "name": "Bates, Alexander Shakeel",
+      "orcid": "0000-0002-1195-0445",
+      "affiliation": "Harvard Medical School"
+    },
+    {
+      "name": "Yang, Helen H.",
+      "orcid": "0000-0001-5140-9664",
+      "affiliation": "Harvard Medical School"
+    },
+    {
+      "name": "Jefferis, Gregory S. X. E.",
+      "orcid": "0000-0002-0587-9355",
+      "affiliation": "MRC Laboratory of Molecular Biology"
+    }
   ],
-  "contributors": [
-    {"type": "ContactPerson", "name": "Bates, Alexander Shakeel", "orcid": "0000-0002-1195-0445", "affiliation": "Harvard Medical School"},
-    {"type": "ContactPerson", "name": "Yang, Helen H.", "orcid": "0000-0001-5140-9664", "affiliation": "Harvard Medical School"},
-    {"type": "ContactPerson", "name": "Jefferis, Gregory S. X. E.", "orcid": "0000-0002-0587-9355", "affiliation": "MRC Laboratory of Molecular Biology"}
+  "grants": [
+    {
+      "id": "10.13039/100010269::222782/Z/21/Z"
+    },
+    {
+      "id": "10.13039/100000002::K99NS129759"
+    },
+    {
+      "id": "10.13039/100000001::2014862"
+    },
+    {
+      "id": "10.13039/501100000265::MC_EX_MR/T046279/1"
+    }
   ],
   "keywords": [
-    "connectomics", "Drosophila", "BANC", "natverse",
-    "CAVE", "neuron", "R client"
+    "connectomics",
+    "Drosophila",
+    "BANC",
+    "natverse",
+    "CAVE",
+    "neuron",
+    "R client"
   ],
   "related_identifiers": [
-    {"relation": "isSupplementTo", "identifier": "10.1101/2025.07.31.667571", "resource_type": "publication-preprint"},
-    {"relation": "isSourceOf", "identifier": "10.7910/DVN/7WTH1N", "resource_type": "dataset"}
+    {
+      "relation": "isSupplementTo",
+      "identifier": "10.1101/2025.07.31.667571",
+      "resource_type": "publication-preprint"
+    },
+    {
+      "relation": "isSourceOf",
+      "identifier": "10.7910/DVN/7WTH1N",
+      "resource_type": "dataset"
+    }
   ]
 }
