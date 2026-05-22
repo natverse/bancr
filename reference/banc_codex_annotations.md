@@ -9,7 +9,13 @@ connectome.
 ## Usage
 
 ``` r
-banc_codex_annotations(rootids = NULL, live = TRUE, ...)
+banc_codex_annotations(
+  rootids = NULL,
+  live = TRUE,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 ```
 
 ## Arguments

@@ -53,6 +53,8 @@
   : Generate FlyWireCodex search URLs for BANC v626 dataset
 - [`banc_decapitate()`](https://natverse.github.io/bancr/reference/banc_decapitate.md)
   : Subset points to be in the brain or in the VNC
+- [`banc_edgelist_split()`](https://natverse.github.io/bancr/reference/banc_edgelist_split.md)
+  : Compartment-resolved BANC edgelist
 - [`banc_ids()`](https://natverse.github.io/bancr/reference/banc_ids.md)
   : Return a vector of banc root ids from diverse inputs
 - [`banc_influence()`](https://natverse.github.io/bancr/reference/banc_influence.md)
@@ -73,6 +75,8 @@
   : Query cached BANC meta data
 - [`banc_meta_create_cache()`](https://natverse.github.io/bancr/reference/banc_meta_create_cache.md)
   : Create or refresh cache of BANC meta information
+- [`banc_metrics()`](https://natverse.github.io/bancr/reference/banc_metrics.md)
+  : Per-neuron metrics for BANC v888
 - [`banc_mirror()`](https://natverse.github.io/bancr/reference/banc_mirror.md)
   : Mirror BANC Connectome Points
 - [`banc_mirror_tpsreg`](https://natverse.github.io/bancr/reference/banc_mirror_tpsreg.md)
@@ -104,6 +108,8 @@
 - [`banc_set_token()`](https://natverse.github.io/bancr/reference/banc_set_token.md)
   : Set the token to be used to authenticate to banc autosegmentation
   resources
+- [`banc_synapses_enriched()`](https://natverse.github.io/bancr/reference/banc_synapses_enriched.md)
+  : Synapse-level BANC table with neuropil / NT enrichment
 - [`banc_to_JRC2018F()`](https://natverse.github.io/bancr/reference/banc_to_JRC2018F.md)
   : Transform Points between BANC Connectome and JRC2018F Template Brain
 - [`banc_to_jrc2018f_tpsreg`](https://natverse.github.io/bancr/reference/banc_to_jrc2018f_tpsreg.md)

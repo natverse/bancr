@@ -18,6 +18,7 @@
 <url><loc>https://natverse.github.io/bancr/reference/banc_codex_network.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_codex_search.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_decapitate.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/reference/banc_edgelist_split.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_ids.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_influence.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_influence_arrow.html</loc></url>
@@ -30,6 +31,7 @@
 <url><loc>https://natverse.github.io/bancr/reference/banc_lm_scene.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_meta.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_meta_create_cache.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/reference/banc_metrics.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_mirror.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_mirror_tpsreg.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_nblast_matches.html</loc></url>
@@ -43,6 +45,7 @@
 <url><loc>https://natverse.github.io/bancr/reference/banc_rootid.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_scene.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_set_token.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/reference/banc_synapses_enriched.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_to_JRC2018F.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_to_jrc2018f_tpsreg.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_upload_mesh.html</loc></url>
