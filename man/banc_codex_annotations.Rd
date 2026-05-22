@@ -4,7 +4,13 @@
 \alias{banc_codex_annotations}
 \title{Read BANC-FlyWireCodex annotation table}
 \usage{
-banc_codex_annotations(rootids = NULL, live = TRUE, ...)
+banc_codex_annotations(
+  rootids = NULL,
+  live = TRUE,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 }
 \arguments{
 \item{rootids}{Character vector specifying one or more BANC rootids. As a

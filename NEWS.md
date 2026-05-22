@@ -1,5 +1,46 @@
 # bancr 0.3.2 (development)
 
+* CAVE-table accessors now default to a public GCS snapshot
+  (`neuron_annotations/v888/*.parquet`). Each of `banc_cell_info()`,
+  `banc_codex_annotations()`, `banc_nuclei()`, `banc_backbone_proofread()`,
+  `banc_proofreading_notes()`, `banc_neck_connective_neurons()` and
+  `banc_peripheral_nerves()` gains:
+    * `source = c("gcs", "cave")` — default `"gcs"`. Reads the
+      v888 parquet snapshot under
+      `gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_annotations/v888/`
+      (cached locally; no BANC authentication required).
+    * `fallback = TRUE` — on primary-source failure, automatically
+      retry against the other source with a warning. Pass
+      `fallback = FALSE` to surface the original error instead.
+    * `banc_cell_info()` and `banc_proofreading_notes()` now actually
+      honour the `rootids` argument (previously declared but unused);
+      filter applies in both GCS and CAVE branches.
+* On first call with a given source, the function emits a one-shot
+  message describing where data is coming from and how to switch.
+  Subsequent calls in the same session are silent (rlang's
+  `.frequency = "once"` mechanism).
+* Three new GCS-only accessors:
+    * `banc_metrics()` — per-neuron cable / volume / synapse-count
+      metrics from `compiled_data/banc_888/banc_888_metrics.feather`
+      (~7.5 MB).
+    * `banc_edgelist_split(version = c("v2", "v3", "legacy"))` —
+      compartment-resolved edgelist (axon / dendrite / etc.) from
+      `compiled_data/banc_888/banc_888_edgelist_split_<version>.feather`.
+    * `banc_synapses_enriched(version = c("v2", "v3"))` — lazy
+      `arrow::open_dataset()` handle over the per-synapse enriched
+      parquet (~9.6 GB v2 / ~15 GB v3). Apply `dplyr::filter()` and
+      `dplyr::collect()` to get a data frame.
+* `safe_raw2nm_position()` now accepts either the character form
+  returned by CAVE or the arrow `list<integer>` form returned by
+  `arrow::read_parquet()` on the GCS snapshots, so the GCS and CAVE
+  branches share the same post-processing path.
+* New internal helpers in `R/gcs_sources.R`
+  (`banc_source_announce()`, `banc_with_fallback()`,
+  `banc_gcs_annotation_parquet()`) and a `banc_gcs_compiled_path()`
+  factored out from `banc_gcs_compiled_feather()` so lazy parquet
+  consumers (like `banc_synapses_enriched()`) can share the cached
+  download path.
+
 * `banc_edgelist()` now defaults to `source = "gcs"`, reading the
   pre-computed
   `compiled_data/banc_888/banc_888_edgelist_simple_<version>.feather`

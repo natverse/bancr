@@ -41,24 +41,50 @@ banc_nuclei(
   nucleus_ids = NULL,
   table = c("both", "somas_v1a", "somas_v1b"),
   rawcoords = FALSE,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
   ...
 )
 
-banc_cell_info(rootids = NULL, rawcoords = FALSE, ...)
+banc_cell_info(
+  rootids = NULL,
+  rawcoords = FALSE,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 
-banc_proofreading_notes(rootids = NULL, rawcoords = FALSE, ...)
+banc_proofreading_notes(
+  rootids = NULL,
+  rawcoords = FALSE,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 
 banc_cell_ids(rootids = NULL, ...)
 
 banc_neck_connective_neurons(
   rootids = NULL,
   table = c("neck_connective_y92500", "neck_connective_y121000"),
+  source = c("gcs", "cave"),
+  fallback = TRUE,
   ...
 )
 
-banc_peripheral_nerves(rootids = NULL, ...)
+banc_peripheral_nerves(
+  rootids = NULL,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 
-banc_backbone_proofread(rootids = NULL, ...)
+banc_backbone_proofread(
+  rootids = NULL,
+  source = c("gcs", "cave"),
+  fallback = TRUE,
+  ...
+)
 
 banc_nt_prediction(
   rootids = NULL,

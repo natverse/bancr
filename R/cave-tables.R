@@ -63,9 +63,18 @@ Please ask for help on #annotation_infrastructure https://flywire-forum.slack.co
   }
 }
 
-# Safe position conversion: skips empty/NA values instead of erroring
+# Safe position conversion: skips empty/NA values instead of erroring.
+# Accepts either a character vector ("x, y, z" form, as returned by
+# get_cave_table_data) or a list-of-integer / arrow `vctrs_list_of`
+# column (as returned by arrow::read_parquet on the GCS snapshots).
 safe_raw2nm_position <- function(x) {
   if (length(x) == 0) return(x)
+  if (is.list(x)) {
+    x <- vapply(x, function(v) {
+      if (is.null(v) || length(v) == 0L || all(is.na(v))) NA_character_
+      else paste(v, collapse = ", ")
+    }, character(1))
+  }
   valid <- !is.na(x) & nzchar(x)
   if (!any(valid)) return(x)
   x[valid] <- xyzmatrix2str(banc_raw2nm(x[valid]))
@@ -242,75 +251,105 @@ banc_nuclei <- function(rootids = NULL,
                          nucleus_ids = NULL,
                          table = c("both","somas_v1a","somas_v1b"),
                          rawcoords = FALSE,
+                         source = c("gcs", "cave"),
+                         fallback = TRUE,
                          ...) {
   table <- match.arg(table)
-  if(table=="both"){
-    ba <- banc_nuclei(table="somas_v1a", nucleus_ids=nucleus_ids,rawcoords=rawcoords,...)
-    bb <- banc_nuclei(table="somas_v1b", nucleus_ids=nucleus_ids,rawcoords=rawcoords,...)
-    # somas_v1b is a corrections table for somas_v1a: rows in B
-    # supersede rows in A with the same nucleus_id (B carries the
-    # corrected nucleus_id -> position mapping; A's position for those
-    # nuclei is wrong). Drop the superseded rows from A before binding
-    # so we don't return both the stale and the corrected position for
-    # the same nucleus.
-    if (nrow(bb) > 0 && nrow(ba) > 0)
-      ba <- ba[!ba$nucleus_id %in% bb$nucleus_id, , drop = FALSE]
-    return(plyr::rbind.fill(bb,ba))
-  }
+  source <- match.arg(source)
   if (!is.null(rootids) & !is.null(nucleus_ids))
     stop("You must supply only one of rootids or nucleus_ids!")
-  res <- if (is.null(rootids) && is.null(nucleus_ids))
-    banc_cave_query(table = table, ...)
-  else if (!is.null(rootids)) {
-    rootids <- banc_ids(rootids)
-    nuclei <- if (length(rootids) < 200)
-      banc_cave_query(table =  table,
-                      filter_in_dict = list(pt_root_id=rootids),
-                      ...)
-    else
-      banc_cave_query(table =  table,
-                      live = TRUE,
-                      ...)
-    if (nrow(nuclei) == 0)
-      return(nuclei)
-    nuclei <- nuclei %>%
-      dplyr::right_join(data.frame(pt_root_id = as.integer64(rootids)),
-                        by = "pt_root_id") %>%
-      dplyr::select(colnames(nuclei))
-    if (length(rootids) < 200) {
-      nuclei
+
+  # Shared post-processing: collapse pt_position to string, rename id
+  # columns, filter to valid rows, optionally add nm coords.
+  finalise <- function(res) {
+    if (nrow(res) == 0L) return(res)
+    res$pt_position <- sapply(res$pt_position, paste, collapse = ", ")
+    # CAVE returns `valid` as the character "t"/"f"; the GCS parquet
+    # stores it as a logical. Normalise to logical so the same filter
+    # works for both sources.
+    res$valid <- if (is.character(res$valid)) res$valid == "t"
+                 else as.logical(res$valid)
+    res <- res %>%
+      dplyr::rename(nucleus_id = .data$id,
+                    nucleus_position = .data$pt_position,
+                    root_id = .data$pt_root_id) %>%
+      dplyr::filter(.data$valid)
+    if (isFALSE(rawcoords) && nrow(res) > 0) {
+      valid_pos <- !is.na(res$nucleus_position) & nzchar(res$nucleus_position)
+      res$nucleus_position_nm <- NA_character_
+      if (any(valid_pos)) {
+        res$nucleus_position_nm[valid_pos] <- gsub(
+          "\\(|\\)", "",
+          apply(banc_raw2nm(res$nucleus_position[valid_pos]), 1, paste_coords))
+      }
     }
-    else {
+    res
+  }
+
+  # Single-table CAVE read with the existing rootid/nucleus_id paths.
+  cave_single <- function(tbl) {
+    res <- if (is.null(rootids) && is.null(nucleus_ids))
+      banc_cave_query(table = tbl, ...)
+    else if (!is.null(rootids)) {
+      rootids2 <- banc_ids(rootids)
+      nuclei <- if (length(rootids2) < 200)
+        banc_cave_query(table = tbl,
+                        filter_in_dict = list(pt_root_id = rootids2),
+                        ...)
+      else
+        banc_cave_query(table = tbl, live = TRUE, ...)
+      if (nrow(nuclei) == 0) return(nuclei)
+      nuclei <- nuclei %>%
+        dplyr::right_join(data.frame(pt_root_id = as.integer64(rootids2)),
+                          by = "pt_root_id") %>%
+        dplyr::select(colnames(nuclei))
+      if (length(rootids2) < 200) nuclei
+      else nuclei %>% dplyr::mutate(
+        pt_root_id = with_banc(flywire_updateids(.data$pt_root_id,
+                                                 svids = .data$pt_supervoxel_id)))
+    } else {
+      nuclei <- banc_cave_query(table = tbl,
+                                filter_in_dict = list(id = nucleus_ids),
+                                ...)
       nuclei %>%
-        dplyr::mutate(
-          pt_root_id = with_banc(flywire_updateids(
-            .data$pt_root_id,
-            svids = .data$pt_supervoxel_id)))
+        dplyr::right_join(data.frame(id = as.integer64(nucleus_ids)),
+                          by = "id") %>%
+        dplyr::select(colnames(nuclei))
     }
-  } else {
-    nuclei <- banc_cave_query(table = table,
-                              filter_in_dict = list(id=nucleus_ids),
-                              ...)
-    nuclei %>%
-      dplyr::right_join(data.frame(id = as.integer64(nucleus_ids)), by = "id") %>%
-      dplyr::select(colnames(nuclei))
+    finalise(res)
   }
-  res$pt_position <- sapply(res$pt_position, paste, collapse=", ")
-  # res$pt_position_ref <- sapply(res$pt_position_ref, paste, collapse=", ")
-  res <- res %>%
-    dplyr::rename(nucleus_id = .data$id,
-                  nucleus_position = .data$pt_position,
-                  root_id = .data$pt_root_id) %>%
-    dplyr::filter(.data$valid=="t")
-  if (isFALSE(rawcoords) && nrow(res) > 0) {
-    valid_pos <- !is.na(res$nucleus_position) & nzchar(res$nucleus_position)
-    res$nucleus_position_nm <- NA_character_
-    if (any(valid_pos)) {
-      res$nucleus_position_nm[valid_pos] <- gsub("\\(|\\)", "",
-        apply(banc_raw2nm(res$nucleus_position[valid_pos]), 1, paste_coords))
+
+  cave_fn <- function() {
+    if (table == "both") {
+      ba <- cave_single("somas_v1a")
+      bb <- cave_single("somas_v1b")
+      # somas_v1b is a corrections table for somas_v1a: rows in B
+      # supersede rows in A with the same nucleus_id (B carries the
+      # corrected nucleus_id -> position mapping; A's position for
+      # those nuclei is wrong). Drop the superseded rows from A
+      # before binding so we don't return both the stale and the
+      # corrected position for the same nucleus.
+      if (nrow(bb) > 0 && nrow(ba) > 0)
+        ba <- ba[!ba$nucleus_id %in% bb$nucleus_id, , drop = FALSE]
+      return(plyr::rbind.fill(bb, ba))
     }
+    cave_single(table)
   }
-  res
+
+  gcs_fn <- function() {
+    if (table != "both") {
+      warning(sprintf(
+        paste0("`banc_nuclei()`: the GCS snapshot somas_v1.parquet ",
+               "is already merged from v1a + v1b, so explicit table = \"%s\" ",
+               "is ignored. Use source = \"cave\" for the v1a/v1b split."),
+        table), call. = FALSE)
+    }
+    res <- banc_gcs_annotation_parquet("somas_v1")
+    res <- banc_gcs_filter(res, rootids = rootids, nucleus_ids = nucleus_ids)
+    finalise(res)
+  }
+
+  banc_with_fallback("banc_nuclei", source, fallback, gcs_fn, cave_fn)
 }
 
 ### neuron meta data ###
@@ -324,28 +363,44 @@ banc_nuclei <- function(rootids = NULL,
 #' @export
 #' @importFrom dplyr mutate ends_with across
 #' @importFrom nat xyzmatrix2str
-banc_cell_info <- function(rootids = NULL, rawcoords = FALSE, ...){
+banc_cell_info <- function(rootids = NULL, rawcoords = FALSE,
+                           source = c("gcs", "cave"),
+                           fallback = TRUE,
+                           ...){
+  source <- match.arg(source)
   table <- "cell_info"
-  res <- with_banc(get_cave_table_data(table, ...))
-  if (isTRUE(rawcoords))
-    res
-  else {
-    res %>% mutate(across(ends_with("position"),
-                          safe_raw2nm_position))
+  finalise <- function(res) {
+    res <- banc_gcs_filter(res, rootids = rootids)
+    if (isTRUE(rawcoords)) res
+    else res %>% mutate(across(ends_with("position"),
+                               safe_raw2nm_position))
   }
+  banc_with_fallback(
+    fn = "banc_cell_info", source = source, fallback = fallback,
+    gcs_fn  = function() finalise(banc_gcs_annotation_parquet(table)),
+    cave_fn = function() finalise(with_banc(get_cave_table_data(table, ...)))
+  )
 }
 
 #' @rdname banc_cave_tables
 #' @export
-banc_proofreading_notes <- function(rootids = NULL, rawcoords = FALSE, ...){
+banc_proofreading_notes <- function(rootids = NULL, rawcoords = FALSE,
+                                    source = c("gcs", "cave"),
+                                    fallback = TRUE,
+                                    ...){
+  source <- match.arg(source)
   table <- "proofreading_notes"
-  res <- with_banc(get_cave_table_data(table, ...))
-  if (isTRUE(rawcoords))
-    res
-  else {
-    res %>% mutate(across(ends_with("position"),
-                          safe_raw2nm_position))
+  finalise <- function(res) {
+    res <- banc_gcs_filter(res, rootids = rootids)
+    if (isTRUE(rawcoords)) res
+    else res %>% mutate(across(ends_with("position"),
+                               safe_raw2nm_position))
   }
+  banc_with_fallback(
+    fn = "banc_proofreading_notes", source = source, fallback = fallback,
+    gcs_fn  = function() finalise(banc_gcs_annotation_parquet(table)),
+    cave_fn = function() finalise(with_banc(get_cave_table_data(table, ...)))
+  )
 }
 
 #' @rdname banc_cave_tables
@@ -357,22 +412,53 @@ banc_cell_ids <- function(rootids = NULL,  ...){
 #' @rdname banc_cave_tables
 #' @export
 banc_neck_connective_neurons <- function(rootids = NULL,
-                                         table = c("neck_connective_y92500", "neck_connective_y121000"),
+                                         table = c("neck_connective_y92500",
+                                                   "neck_connective_y121000"),
+                                         source = c("gcs", "cave"),
+                                         fallback = TRUE,
                                          ...){
   table <- match.arg(table)
-  with_banc(get_cave_table_data(table, rootids, ...))
+  source <- match.arg(source)
+  banc_with_fallback(
+    fn = "banc_neck_connective_neurons", source = source, fallback = fallback,
+    gcs_fn  = function() banc_gcs_filter(banc_gcs_annotation_parquet(table),
+                                         rootids = rootids),
+    cave_fn = function() with_banc(get_cave_table_data(table, rootids, ...))
+  )
 }
 
 #' @rdname banc_cave_tables
 #' @export
-banc_peripheral_nerves <- function(rootids = NULL, ...){
-  with_banc(get_cave_table_data("peripheral_nerves", rootids, ...))
+banc_peripheral_nerves <- function(rootids = NULL,
+                                   source = c("gcs", "cave"),
+                                   fallback = TRUE,
+                                   ...){
+  source <- match.arg(source)
+  banc_with_fallback(
+    fn = "banc_peripheral_nerves", source = source, fallback = fallback,
+    gcs_fn  = function() banc_gcs_filter(
+                            banc_gcs_annotation_parquet("peripheral_nerves"),
+                            rootids = rootids),
+    cave_fn = function() with_banc(get_cave_table_data("peripheral_nerves",
+                                                       rootids, ...))
+  )
 }
 
 #' @rdname banc_cave_tables
 #' @export
-banc_backbone_proofread <- function(rootids = NULL, ...){
-  with_banc(get_cave_table_data("backbone_proofread", rootids, ...))
+banc_backbone_proofread <- function(rootids = NULL,
+                                    source = c("gcs", "cave"),
+                                    fallback = TRUE,
+                                    ...){
+  source <- match.arg(source)
+  banc_with_fallback(
+    fn = "banc_backbone_proofread", source = source, fallback = fallback,
+    gcs_fn  = function() banc_gcs_filter(
+                            banc_gcs_annotation_parquet("backbone_proofread"),
+                            rootids = rootids),
+    cave_fn = function() with_banc(get_cave_table_data("backbone_proofread",
+                                                       rootids, ...))
+  )
 }
 
 #' Read NBLAST match results from CAVE
@@ -1187,81 +1273,96 @@ banc_annotate_bound_tag_user_cave_table <- function(positions,
 #' \dontrun{
 #' banc.meta <- banc_codex_annotations()
 #' }
-banc_codex_annotations <- function (rootids = NULL, live = TRUE, ...){
+banc_codex_annotations <- function (rootids = NULL, live = TRUE,
+                                    source = c("gcs", "cave"),
+                                    fallback = TRUE,
+                                    ...){
+  source <- match.arg(source)
   table_name <- "codex_annotations"
-
-  if (!is.null(rootids)) {
-    # If rootids are specified, query for those specific rootids
-    rootids <- banc_ids(rootids)
-    if (length(rootids) < 200) {
-      codex_annotations <- banc_cave_query(table_name,
-                                           live = live,
-                                           filter_in_dict = list(pt_root_id = rootids),
-                                           ...)
-    } else {
-      # For large numbers of rootids, get all data and filter
-      codex_annotations_part_1 <- banc_cave_query(table_name, live = live,
-                                                  limit = 500000, ...)
-      codex_annotations_part_2 <- banc_cave_query(table_name, live = live,
-                                                  offset = 500000, limit = 350000, ...)
-      codex_annotations_part_3 <- banc_cave_query(table_name, live = live,
-                                                  offset = 850000, ...)
-      codex_annotations_part_1 <- codex_annotations_part_1 %>%
-        dplyr::mutate(cell_type = as.character(.data$cell_type))
-      codex_annotations_part_2 <- codex_annotations_part_2 %>%
-        dplyr::mutate(cell_type = as.character(.data$cell_type))
-      codex_annotations_part_3 <- codex_annotations_part_3 %>%
-        dplyr::mutate(cell_type = as.character(.data$cell_type))
-      codex_annotations <- dplyr::bind_rows(codex_annotations_part_1,
-                                            codex_annotations_part_2,
-                                            codex_annotations_part_3) %>%
-        dplyr::filter(.data$pt_root_id %in% rootids)
-    }
-  } else {
-    # Get all data if no rootids specified
-    codex_annotations_part_1 <- banc_cave_query(table_name, live = live,
-                                                limit = 500000, ...)
-    codex_annotations_part_2 <- banc_cave_query(table_name, live = live,
-                                                offset = 500000, limit = 350000, ...)
-    codex_annotations_part_3 <- banc_cave_query(table_name, live = live,
-                                                offset = 850000, ...)
-    codex_annotations_part_1 <- codex_annotations_part_1 %>%
-      dplyr::mutate(cell_type = as.character(.data$cell_type))
-    codex_annotations_part_2 <- codex_annotations_part_2 %>%
-      dplyr::mutate(cell_type = as.character(.data$cell_type))
-    codex_annotations_part_3 <- codex_annotations_part_3 %>%
-      dplyr::mutate(cell_type = as.character(.data$cell_type))
-    codex_annotations <- dplyr::bind_rows(codex_annotations_part_1,
-                                          codex_annotations_part_2,
-                                          codex_annotations_part_3)
-  }
-
-  codex_annotations <- codex_annotations %>%
-    dplyr::mutate(cell_type = as.character(.data$cell_type))
 
   if (!requireNamespace("tidyr", quietly = TRUE)) {
     stop("Package 'tidyr' is required for this function. Please install it with: install.packages('tidyr')")
   }
 
-  if (live == 2) {
-    codex_annotations_flat_table <- codex_annotations %>%
-      dplyr::group_by(.data$target_id, .data$classification_system) %>%
-      dplyr::summarise(cell_type_combined = paste(unique(.data$cell_type),
-                                                  collapse = ", "), .groups = "drop") %>%
-      tidyr::pivot_wider(names_from = .data$classification_system,
-                         values_from = .data$cell_type_combined, values_fill = NA_character_)
-  }
-  else {
-    codex_annotations_flat_table <- codex_annotations %>%
-      dplyr::group_by(.data$target_id, .data$classification_system,
-                      .data$pt_supervoxel_id, .data$pt_root_id, .data$pt_position) %>%
-      dplyr::summarise(cell_type_combined = paste(unique(.data$cell_type),
-                                                  collapse = ", "), .groups = "drop") %>%
-      tidyr::pivot_wider(names_from = .data$classification_system,
-                         values_from = .data$cell_type_combined, values_fill = NA_character_)
+  # Shared pivot: raw long-form annotation rows -> one row per neuron
+  # with a column per classification_system. Matches the historic
+  # return shape.
+  pivot_codex <- function(codex_annotations) {
+    codex_annotations <- codex_annotations %>%
+      dplyr::mutate(cell_type = as.character(.data$cell_type))
+    if (isTRUE(live == 2)) {
+      codex_annotations %>%
+        dplyr::group_by(.data$target_id, .data$classification_system) %>%
+        dplyr::summarise(cell_type_combined = paste(unique(.data$cell_type),
+                                                    collapse = ", "),
+                         .groups = "drop") %>%
+        tidyr::pivot_wider(names_from = .data$classification_system,
+                           values_from = .data$cell_type_combined,
+                           values_fill = NA_character_)
+    } else {
+      codex_annotations %>%
+        dplyr::group_by(.data$target_id, .data$classification_system,
+                        .data$pt_supervoxel_id, .data$pt_root_id,
+                        .data$pt_position) %>%
+        dplyr::summarise(cell_type_combined = paste(unique(.data$cell_type),
+                                                    collapse = ", "),
+                         .groups = "drop") %>%
+        tidyr::pivot_wider(names_from = .data$classification_system,
+                           values_from = .data$cell_type_combined,
+                           values_fill = NA_character_)
+    }
   }
 
-  return(codex_annotations_flat_table)
+  gcs_fn <- function() {
+    codex_annotations <- banc_gcs_annotation_parquet(table_name)
+    if (!is.null(rootids)) {
+      rootids2 <- banc_ids(rootids)
+      codex_annotations <- codex_annotations[
+        as.character(codex_annotations$pt_root_id) %in% as.character(rootids2),
+        , drop = FALSE]
+    }
+    pivot_codex(codex_annotations)
+  }
+
+  cave_fn <- function() {
+    if (!is.null(rootids)) {
+      rootids2 <- banc_ids(rootids)
+      if (length(rootids2) < 200) {
+        codex_annotations <- banc_cave_query(
+          table_name, live = live,
+          filter_in_dict = list(pt_root_id = rootids2),
+          ...)
+      } else {
+        codex_annotations <- dplyr::bind_rows(
+          banc_cave_query(table_name, live = live,
+                          limit = 500000, ...) %>%
+            dplyr::mutate(cell_type = as.character(.data$cell_type)),
+          banc_cave_query(table_name, live = live,
+                          offset = 500000, limit = 350000, ...) %>%
+            dplyr::mutate(cell_type = as.character(.data$cell_type)),
+          banc_cave_query(table_name, live = live,
+                          offset = 850000, ...) %>%
+            dplyr::mutate(cell_type = as.character(.data$cell_type))
+        ) %>%
+          dplyr::filter(.data$pt_root_id %in% rootids2)
+      }
+    } else {
+      codex_annotations <- dplyr::bind_rows(
+        banc_cave_query(table_name, live = live,
+                        limit = 500000, ...) %>%
+          dplyr::mutate(cell_type = as.character(.data$cell_type)),
+        banc_cave_query(table_name, live = live,
+                        offset = 500000, limit = 350000, ...) %>%
+          dplyr::mutate(cell_type = as.character(.data$cell_type)),
+        banc_cave_query(table_name, live = live,
+                        offset = 850000, ...) %>%
+          dplyr::mutate(cell_type = as.character(.data$cell_type))
+      )
+    }
+    pivot_codex(codex_annotations)
+  }
+
+  banc_with_fallback("banc_codex_annotations", source, fallback, gcs_fn, cave_fn)
 }
 
 #' @rdname banc_cave_tables

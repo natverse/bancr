@@ -27,6 +27,13 @@ banc_gcs_compiled_feather <- function(rel_path, overwrite = FALSE) {
     stop("Package 'arrow' is required to read .feather tables. ",
          "Install with: install.packages('arrow')")
   }
+  arrow::read_feather(banc_gcs_compiled_path(rel_path, overwrite = overwrite))
+}
+
+# Internal: download compiled_data/<rel_path> to the local cache and
+# return the cached path. Used by both banc_gcs_compiled_feather()
+# and the lazy-parquet helpers (banc_synapses_enriched).
+banc_gcs_compiled_path <- function(rel_path, overwrite = FALSE) {
   cache_dir <- tools::R_user_dir("bancr", "cache")
   if (!dir.exists(cache_dir)) dir.create(cache_dir, recursive = TRUE)
   target <- file.path(cache_dir, basename(rel_path))
@@ -45,7 +52,7 @@ banc_gcs_compiled_feather <- function(rel_path, overwrite = FALSE) {
     on.exit(options(timeout = old_timeout), add = TRUE)
     utils::download.file(url, target, mode = "wb", quiet = FALSE)
   }
-  arrow::read_feather(target)
+  target
 }
 
 # Thin wrapper for the per-dataset meta feathers used by
