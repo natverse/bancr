@@ -5,7 +5,8 @@
   "upload_type": "software",
   "access_right": "open",
   "creators": [
-    {"name": "Bates, Alexander Shakeel", "orcid": "0000-0002-1195-0445", "affiliation": "Harvard Medical School"}
+    {"name": "Bates, Alexander Shakeel", "orcid": "0000-0002-1195-0445", "affiliation": "Harvard Medical School"},
+    {"name": "Jefferis, Gregory S. X. E.", "orcid": "0000-0002-0587-9355", "affiliation": "MRC Laboratory of Molecular Biology"}
   ],
   "keywords": [
     "connectomics", "Drosophila", "BANC", "natverse",
