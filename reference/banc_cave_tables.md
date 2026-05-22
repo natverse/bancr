@@ -160,6 +160,12 @@ banc_version()
   (<https://en.wikipedia.org/wiki/Cell_nucleus>) contains the cell body
   and provides a stable reference point for neuron identification.
 
+- fallback:
+
+  Logical, default `TRUE`. If the primary `source` errors, automatically
+  retry against the alternative source and emit a warning describing
+  what happened. Set `FALSE` to surface the original error directly.
+
 - simplify:
 
   logical, if `TRUE` then the proportion of presynaptic connections for

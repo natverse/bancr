@@ -32,6 +32,18 @@ banc_codex_annotations(
   logical, get the most recent data or pull from the latest
   materialisation
 
+- source:
+
+  `"gcs"` (default; reads the public
+  `neuron_annotations/v888/codex_annotations.parquet` snapshot, no
+  authentication required) or `"cave"` (live CAVE materialised query).
+
+- fallback:
+
+  Logical, default `TRUE`. On primary-source failure, retry the
+  alternative source and emit a warning. Set `FALSE` to surface the
+  original error.
+
 - ...:
 
   method passed to

@@ -71,6 +71,19 @@ to pass in data.frames, BANC URLs or simple ids.</p></dd>
 <dd><p>logical, get the most recent data or pull from the latest materialisation</p></dd>
 
 
+<dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
+<dd><p><code>"gcs"</code> (default; reads the public
+<code>neuron_annotations/v888/codex_annotations.parquet</code> snapshot,
+no authentication required) or <code>"cave"</code> (live CAVE materialised
+query).</p></dd>
+
+
+<dt id="arg-fallback">fallback<a class="anchor" aria-label="anchor" href="#arg-fallback"></a></dt>
+<dd><p>Logical, default <code>TRUE</code>. On primary-source failure,
+retry the alternative source and emit a warning. Set <code>FALSE</code> to
+surface the original error.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>method passed to <code><a href="banc_cave_query.html">banc_cave_query</a></code>.</p></dd>
 
