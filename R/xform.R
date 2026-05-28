@@ -268,9 +268,15 @@ update_elastix_transforms_locations <- function(transform_file,
   # Define the target pattern and replacement
   target_pattern <- sprintf('(InitialTransformParametersFileName\\s*")(.+%s\\.txt)(")', search)
 
-  # Function to replace the target pattern
+  # Function to replace the target pattern. The matched value is the full path
+  # including the `<search>.txt` filename, so the replacement must rebuild that
+  # filename too: substituting `file_path` alone collapses the chained
+  # InitialTransformParametersFileName to a bare directory, which transformix
+  # cannot read (it then fails to load the affine/coarse stages of the chain).
   replace_path <- function(line) {
-    gsub(target_pattern, paste0("\\1", file_path, "\\3"), line)
+    gsub(target_pattern,
+         paste0("\\1", file.path(file_path, paste0(search, ".txt")), "\\3"),
+         line)
   }
 
   # Apply the replacement to each line
