@@ -2,6 +2,8 @@
 <url><loc>https://natverse.github.io/bancr/404.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/LICENSE.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/SUPPORT.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/articles/index.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/authors.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/index.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/news/index.html</loc></url>
@@ -45,6 +47,7 @@
 <url><loc>https://natverse.github.io/bancr/reference/banc_rootid.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_scene.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_set_token.html</loc></url>
+<url><loc>https://natverse.github.io/bancr/reference/banc_shorturl.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_synapses_enriched.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_to_JRC2018F.html</loc></url>
 <url><loc>https://natverse.github.io/bancr/reference/banc_to_jrc2018f_tpsreg.html</loc></url>

@@ -102,8 +102,9 @@ banc_lm_scene(
 - shorten:
 
   logical; if `TRUE` (default), POST the state via the internal
-  `banc_shorturl()` and return a shortened URL. If `FALSE`, return the
-  long fragment-encoded URL with the state JSON inlined.
+  [`banc_shorturl()`](https://natverse.github.io/bancr/reference/banc_shorturl.md)
+  and return a shortened URL. If `FALSE`, return the long
+  fragment-encoded URL with the state JSON inlined.
 
 - open:
 

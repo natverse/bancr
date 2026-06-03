@@ -39,6 +39,10 @@ bancsee produces."><meta property="og:image" content="https://natverse.github.io
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html"><span class="fa fas fa-home fa-lg"></span></a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/front_leg_sensorimotor.html">Front-leg sensorimotor loops</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
 <li class="nav-item"><a class="nav-link" href="../SUPPORT.html">Help</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://natverse.github.io">natverse</a></li>
@@ -164,7 +168,7 @@ Defaults to the public BANC scene used by <code><a href="banc_scene.html">banc_s
 
 <dt id="arg-shorten">shorten<a class="anchor" aria-label="anchor" href="#arg-shorten"></a></dt>
 <dd><p>logical; if <code>TRUE</code> (default), POST the state via
-the internal <code>banc_shorturl()</code> and return a shortened URL. If
+the internal <code><a href="banc_shorturl.html">banc_shorturl()</a></code> and return a shortened URL. If
 <code>FALSE</code>, return the long fragment-encoded URL with the state
 JSON inlined.</p></dd>
 

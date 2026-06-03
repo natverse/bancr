@@ -1,5 +1,26 @@
 # Changelog
 
+## bancr 0.3.3 (development)
+
+- New pkgdown article *“Front-leg sensorimotor loops”* under
+  `vignettes/articles/` — walks through
+  [`banc_codex_annotations()`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md),
+  [`banc_partner_summary()`](https://natverse.github.io/bancr/reference/banc_partner_summary.md)
+  and
+  [`banc_scene()`](https://natverse.github.io/bancr/reference/banc_scene.md)
+  to identify single-leg-neuromere intrinsic neurons that close a
+  monosynaptic loop between left front-leg sensory and motor neurons,
+  then renders the three groups as a coloured public Neuroglancer scene.
+  Lives at
+  <https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html>
+  after the next pkgdown deploy.
+- `banc_datastack_name()` now auto-detects whether a user’s CAVE token
+  grants access to the production `brain_and_nerve_cord` datastack and
+  silently falls back to the read-only public
+  `brain_and_nerve_cord_public` for the session if it does not (with a
+  one-shot warning). `options(bancr.datastack=)` overrides the
+  auto-selection.
+
 ## bancr 0.3.2
 
 - CAVE-table accessors now default to a public GCS snapshot

@@ -149,6 +149,13 @@ ggplot(dna02_connections, aes(x = count)) +
   theme_minimal()
 ```
 
+For a worked example that walks through annotations → partners → a
+public Neuroglancer scene, see the [**Front-leg sensorimotor
+loops**](https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html)
+article — it identifies the single-leg-neuromere intrinsic neurons that
+close a monosynaptic loop between left front-leg sensory and motor
+neurons, and renders the result as a coloured public scene.
+
 ## Annotation Systems
 
 The BANC dataset provides two complementary annotation systems for

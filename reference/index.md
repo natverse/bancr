@@ -108,6 +108,8 @@
 - [`banc_set_token()`](https://natverse.github.io/bancr/reference/banc_set_token.md)
   : Set the token to be used to authenticate to banc autosegmentation
   resources
+- [`banc_shorturl()`](https://natverse.github.io/bancr/reference/banc_shorturl.md)
+  : Shorten a BANC Neuroglancer URL
 - [`banc_synapses_enriched()`](https://natverse.github.io/bancr/reference/banc_synapses_enriched.md)
   : Synapse-level BANC table with neuropil / NT enrichment
 - [`banc_to_JRC2018F()`](https://natverse.github.io/bancr/reference/banc_to_JRC2018F.md)
