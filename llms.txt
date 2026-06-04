@@ -825,7 +825,7 @@ remains under its existing OSI-approved open-source license — see
 When you publish work that uses `bancr`, please cite **both** the BANC
 paper and the package’s Zenodo deposit:
 
-1.  **The BANC paper** (the data and atlas the package wraps):
+1.  **The BANC paper** (the connectome the package accesses):
 
     > Bates AS, Phelps JS, Kim M, Yang HSJ, Matsliah A, Ajabi Z, Perlman
     > E, *et al.* (2026). Distributed control circuits across a
