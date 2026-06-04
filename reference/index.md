@@ -103,6 +103,8 @@
   : Re-root BANC neuron skeleton at soma
 - [`banc_rootid()`](https://natverse.github.io/bancr/reference/banc_rootid.md)
   : Find the root identifier of a banc neuron
+- [`banc_rotation_matrices`](https://natverse.github.io/bancr/reference/banc_rotation_matrices.md)
+  : Canonical BANC viewpoints as 4x4 rotation matrices
 - [`banc_scene()`](https://natverse.github.io/bancr/reference/banc_scene.md)
   : Return a sample Neuroglancer scene URL for BANC dataset
 - [`banc_set_token()`](https://natverse.github.io/bancr/reference/banc_set_token.md)

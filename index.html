@@ -59,7 +59,7 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><p><a href="https://natverse.github.io" class="external-link"><img src="https://img.shields.io/badge/natverse-Part%20of%20the%20natverse-a241b6" alt="natverse"></a> <a href="https://natverse.github.io/bancr/reference/"><img src="https://img.shields.io/badge/docs-100%25-brightgreen.svg" alt="Docs"></a> <a href="https://github.com/natverse/bancr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/natverse/bancr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <!-- badges: end --> bancr <img src="reference/figures/logo.png" align="right" height="139" alt=""> ===========</p>
-<p>The <strong>bancr</strong> package provides R access to the first unified brain-and-nerve-cord connectome of a limbed animal - the Brain And Nerve Cord dataset (<em>BANC</em>) of <em>Drosophila melanogaster</em>. This important dataset represents a significant advance in our understanding of neural circuits, revealing how the brain and nerve cord work together as an integrated system to control behavior.</p>
+<p>The <strong>bancr</strong> package provides R access to the first unified brain-and-nerve-cord connectome of a limbed animal - the <a href="https://doi.org/10.1038/s41586-026-10735-w" class="external-link">Brain And Nerve Cord dataset (<em>BANC</em>)</a> of <em>Drosophila melanogaster</em>. This important dataset represents a significant advance in our understanding of neural circuits, revealing how the brain and nerve cord work together as an integrated system to control behavior.</p>
 <div class="section level3">
 <h3 id="scientific-significance">Scientific Significance<a class="anchor" aria-label="anchor" href="#scientific-significance"></a>
 </h3>
@@ -251,7 +251,7 @@
 <p><strong>Molecular Properties:</strong> - <strong>neurotransmitter_verified</strong>: Literature-confirmed neurotransmitters from unpublished literature review (<a href="https://github.com/funkelab/drosophila_neurotransmitters/tree/main" class="external-link uri">https://github.com/funkelab/drosophila_neurotransmitters/tree/main</a>) (<code>acetylcholine</code>, <code>dopamine</code>, <code>gaba</code>, <code>dopamine</code>, <code>serotonin</code>, <code>ocotopamine</code>, <code>tyramine</code>, <code>histamine</code>, <code>some negative results</code>) - <strong>neurotransmitter_predicted</strong>: CNN-predicted neurotransmitters - <strong>neuropeptide_verified</strong>: Literature-confirmed neuropeptides (<code>AstA</code>, <code>CCAP</code>, <code>dNPF</code>, etc.)</p>
 <p><strong>Cross-Dataset Integration:</strong> - <strong>fafb_783_match_id</strong>: Corresponding FAFB v783 neuron IDs - <strong>manc_121_match_id</strong>: Corresponding MANC v1.2.1 neuron IDs - <strong>hemilineage</strong>: Developmental lineage classification (<code>00A</code>, <code>ALad1</code>, <code>LB7</code>, etc.)</p>
 <p>This systematic annotation framework enables: - <strong>Consistent terminology</strong> across all BANC analyses - <strong>Hierarchical organisation</strong> from broad categories to specific cell types - <strong>Cross-dataset integration</strong> with other <em>Drosophila</em> connectomes (FAFB, MANC) - <strong>Multi-modal characterisation</strong> combining anatomy, function, and molecular properties</p>
-<p>For the complete annotation taxonomy and detailed term descriptions, see the BANC paper supplementary materials (<a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link">Bates et al. 2025</a>) and the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community wiki</a>.</p>
+<p>For the complete annotation taxonomy and detailed term descriptions, see the BANC paper supplementary materials (<a href="https://doi.org/10.1038/s41586-026-10735-w" class="external-link">Bates et al. 2026, <em>Nature</em></a>) and the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community wiki</a>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -577,10 +577,7 @@
 <div class="section level2">
 <h2 id="acknowledging-the-data-and-tools">Acknowledging the data and tools<a class="anchor" aria-label="anchor" href="#acknowledging-the-data-and-tools"></a>
 </h2>
-<p>BANC data needs to be acknowledged in accordance to the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community guidelines</a> and in agreement with the BANC consortium. If you use this package, please cite the BANC paper <a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link">(Bates et al. 2025)</a> and our <em>natverse</em> paper <a href="https://elifesciences.org/articles/53350" class="external-link">(Bates et al. 2020)</a> in addition to the R package itself:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"bancr"</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Bates A, Jefferis G</strong> (2025). <em>bancr: R Client Access to the Brain And Nerve Cord (BANC) Dataset</em>. R package version 0.3.0, <a href="https://github.com/natverse/bancr" class="external-link uri">https://github.com/natverse/bancr</a>.</p>
+<p>BANC data needs to be acknowledged in accordance with the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community guidelines</a> and in agreement with the BANC consortium. See the <a href="#citation"><strong>Citation</strong></a> section at the end of this README for the exact references to cite when you publish work that uses this package.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
@@ -590,13 +587,36 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p><strong>Bates, Alexander Shakeel, Jasper S. Phelps, Minsu Kim, Han S. J. Yang, Arie Matsliah, Zaki Ajabi, Eric Perlman, et al.</strong> 2025. <em>Distributed Control Circuits across a Brain-and-Cord Connectome.</em> bioRxiv 2025.07.31.667571. <a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link uri">https://doi.org/10.1101/2025.07.31.667571</a>.</p>
+<p><strong>Bates, Alexander Shakeel, Jasper S. Phelps, Minsu Kim, Han S. J. Yang, Arie Matsliah, Zaki Ajabi, Eric Perlman, et al.</strong> 2026. <em>Distributed Control Circuits across a Brain-and-Cord Connectome.</em> <em>Nature</em>. <a href="https://doi.org/10.1038/s41586-026-10735-w" class="external-link uri">https://doi.org/10.1038/s41586-026-10735-w</a>. Preprint: bioRxiv 2025.07.31.667571, <a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link uri">https://doi.org/10.1101/2025.07.31.667571</a>.</p>
 <p><strong>Bates, Alexander Shakeel, James D. Manton, Sridhar R. Jagannathan, Marta Costa, Philipp Schlegel, Torsten Rohlfing, and Gregory SXE Jefferis</strong>. 2020. <em>The Natverse, a Versatile Toolbox for Combining and Analysing Neuroanatomical Data.</em> eLife 9 (April). <a href="https://doi.org/10.7554/eLife.53350" class="external-link uri">https://doi.org/10.7554/eLife.53350</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="open-access-hhmi">Open access (HHMI)<a class="anchor" aria-label="anchor" href="#open-access-hhmi"></a>
 </h2>
 <p>This software was developed with support from the Howard Hughes Medical Institute (HHMI). Per HHMI’s open-access policy, the associated manuscript (“Distributed control circuits across a brain-and-cord connectome”) and its Harvard Dataverse data deposit are released under the <a href="https://creativecommons.org/licenses/by/4.0/" class="external-link">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>. This source code remains under its existing OSI-approved open-source license — see <a href="LICENSE.html"><code>LICENSE.md</code></a>.</p>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>When you publish work that uses <code>bancr</code>, please cite <strong>both</strong> the BANC paper and the package’s Zenodo deposit:</p>
+<ol style="list-style-type: decimal">
+<li>
+<p><strong>The BANC paper</strong> (the data and atlas the package wraps):</p>
+<blockquote>
+<p>Bates AS, Phelps JS, Kim M, Yang HSJ, Matsliah A, Ajabi Z, Perlman E, <em>et al.</em> (2026). Distributed control circuits across a brain-and-cord connectome. <em>Nature</em>. <a href="https://doi.org/10.1038/s41586-026-10735-w" class="external-link uri">https://doi.org/10.1038/s41586-026-10735-w</a>. Preprint: bioRxiv 2025.07.31.667571, <a href="https://doi.org/10.1101/2025.07.31.667571" class="external-link uri">https://doi.org/10.1101/2025.07.31.667571</a>.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>The <code>bancr</code> R package itself</strong>, via the version-specific DOI on Zenodo: every tagged release of this repo is archived to Zenodo under the metadata in <a href=".zenodo.json"><code>.zenodo.json</code></a>. The latest release and its DOI badge are listed on the <a href="https://github.com/natverse/bancr/releases" class="external-link">GitHub releases page</a>. Cite the specific version you used, e.g.:</p>
+<blockquote>
+<p>Bates AS, Yang HH, Jefferis GSXE. <em>bancr: R Client Access to the Brain And Nerve Cord (BANC) Dataset</em>. Zenodo. <a href="doi:10.5281/zenodo.%3CID%3E" class="uri">doi:10.5281/zenodo.&lt;ID&gt;</a>;.</p>
+</blockquote>
+<p>In R, the latest installed package’s full reference (BANC paper, <em>natverse</em> paper, and the package version you’ve installed) is available via:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"bancr"</span><span class="op">)</span></span></code></pre></div>
+</li>
+</ol>
+<p>If you also rely on the wider <code>natverse</code> ecosystem that <code>bancr</code> is built on, please additionally cite the <em>natverse</em> paper (<a href="https://elifesciences.org/articles/53350" class="external-link">Bates et al. 2020</a>). Data-use rules and additional acknowledgements are governed by the <a href="https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/" class="external-link">BANC community guidelines</a>.</p>
 </div>
 
   </main><aside class="col-md-3"><div class="links">

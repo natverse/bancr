@@ -14,16 +14,18 @@ Source:
 [`inst/CITATION`](https://github.com/natverse/bancr/blob/main/inst/CITATION)
 
 Bates AS, Phelps JS, Kim M, Yang HSJ, Matsliah A, Ajabi Z, Perlman E, et
-al. (2025). Distributed control circuits across a brain-and-cord
-connectome. bioRxiv 2025.07.31.667571. doi:10.1101/2025.07.31.667571.
+al. (2026). Distributed control circuits across a brain-and-cord
+connectome. Nature. doi:10.1038/s41586-026-10735-w. Preprint: bioRxiv
+2025.07.31.667571, doi:10.1101/2025.07.31.667571.
 
     @Article{,
       title = {Distributed control circuits across a brain-and-cord connectome},
       author = {Alexander Shakeel Bates and Jasper S. Phelps and Minsu Kim and Han S. J. Yang and Arie Matsliah and Zaki Ajabi and Eric Perlman and {et al.}},
-      journal = {bioRxiv},
-      year = {2025},
-      doi = {10.1101/2025.07.31.667571},
-      url = {https://doi.org/10.1101/2025.07.31.667571},
+      journal = {Nature},
+      year = {2026},
+      doi = {10.1038/s41586-026-10735-w},
+      url = {https://www.nature.com/articles/s41586-026-10735-w},
+      note = {Preprint: bioRxiv 2025.07.31.667571, doi:10.1101/2025.07.31.667571},
     }
 
 Bates AS, Manton JD, Jagannathan SR, Costa M, Schlegel P, Rohlfing T,

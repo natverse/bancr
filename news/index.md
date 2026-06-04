@@ -10,10 +10,23 @@
   [`banc_scene()`](https://natverse.github.io/bancr/reference/banc_scene.md)
   to identify single-leg-neuromere intrinsic neurons that close a
   monosynaptic loop between left front-leg sensory and motor neurons,
-  then renders the three groups as a coloured public Neuroglancer scene.
-  Lives at
+  then renders the three groups as a coloured public Neuroglancer scene
+  and as a 3 × 2 nat.ggplot panel of mesh renderings (one column per
+  group, two VNC views). Lives at
   <https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html>
   after the next pkgdown deploy.
+- Exported `banc_rotation_matrices` and
+  [`banc_shorturl()`](https://natverse.github.io/bancr/reference/banc_shorturl.md)
+  so user code (including the new article) can compose multi-panel
+  ggplots in canonical BANC views and shorten Neuroglancer URLs via the
+  `nglstate` server without dropping into `bancr:::`.
+- Updated all in-package BANC paper references to the Nature publication
+  (Bates et al. 2026, <doi:10.1038/s41586-026-10735-w>); the bioRxiv
+  preprint is retained as a secondary reference. README gains a
+  consolidated **Citation** section at the very end explaining that
+  users should cite **both** the BANC paper and the package’s
+  per-release Zenodo deposit, and adds a prominent hyperlink to the
+  Nature paper from the opening BANC description.
 - `banc_datastack_name()` now auto-detects whether a user’s CAVE token
   grants access to the production `brain_and_nerve_cord` datastack and
   silently falls back to the read-only public

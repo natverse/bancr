@@ -1,7 +1,7 @@
 # Front-leg sensorimotor loops
 
-A central claim of the BANC paper ([Bates et
-al. 2025](https://doi.org/10.1101/2025.07.31.667571)) is that motor
+A central claim of the BANC paper ([Bates et al. 2026,
+*Nature*](https://doi.org/10.1038/s41586-026-10735-w)) is that motor
 control in *Drosophila* is **distributed** — many behaviours are not
 orchestrated by a single brain command followed by passive execution in
 the ventral nerve cord (VNC), but instead emerge from local sensorimotor
@@ -164,40 +164,103 @@ intrinsic %>%
 ## Render a sample of the loop in BANC space
 
 Before we build the full interactive scene, here’s a quick static look
-at the geometry. We sample a handful of neurons per group, pull their L2
-skeletons (read against the same public datastack), and use
-[`bancr::banc_neuron_comparison_plot()`](https://natverse.github.io/bancr/reference/banc_neuron_comparison_plot.md)
-to render them against the VNC neuropil. The plot’s three colour ramps
-are blue (sensory) / red (motor) / green (intrinsic), so they line up
-with the Neuroglancer scene below.
+at the geometry. We sample a handful of neurons per group, pull their
+meshes from the public BANC bucket, decapitate them at the neck
+connective to keep only the VNC portion, and lay out a 3 × 2 grid: one
+column per group (sensory, intrinsic, motor), one row per view (VNC
+dorsal, VNC lateral). Each group has its own colour ramp (blues / greens
+/ reds) with within-group jitter so individual neurons remain visually
+separable.
 
 ``` r
+
+library(ggplot2)
+library(patchwork)
 
 set.seed(1)
 sample_ids <- list(
   sensory   = sample(sensory$pt_root_id,   4),
-  motor     = sample(motor$pt_root_id,     4),
-  intrinsic = sample(intrinsic$pt_root_id, 4)
+  intrinsic = sample(intrinsic$pt_root_id, 4),
+  motor     = sample(motor$pt_root_id,     4)
 )
 
-sens_skels <- banc_read_l2skel(sample_ids$sensory)
-#> Default dataset set to "brain_and_nerve_cord_public".
-mot_skels  <- banc_read_l2skel(sample_ids$motor)
-#> Default dataset set to "brain_and_nerve_cord_public".
-intr_skels <- banc_read_l2skel(sample_ids$intrinsic)
-#> Default dataset set to "brain_and_nerve_cord_public".
+sens_m <- banc_read_neuron_meshes(sample_ids$sensory)
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+intr_m <- banc_read_neuron_meshes(sample_ids$intrinsic)
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+mot_m  <- banc_read_neuron_meshes(sample_ids$motor)
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
+#> Warning: deduplication not currently supported for this layer's variable layered draco meshes
 
-banc_neuron_comparison_plot(
-  neuron1 = sens_skels, neuron1.info = "sensory (left front leg)",
-  neuron2 = mot_skels,  neuron2.info = "motor (left front leg)",
-  neuron3 = intr_skels, neuron3.info = "intrinsic (single_leg_neuromere, left)",
-  region  = "vnc",
-  alpha   = c(0.7, 0.7, 0.7)
+# Per-group colour ramps (same families banc_neuron_comparison_plot
+# uses, expanded across the N neurons per group so they stay
+# visually distinct).
+pal_sensory   <- grDevices::colorRampPalette(
+  c("#00008B","#0000CD","#4169E1","#1E90FF","#87CEEB","#B0E0E6"))
+pal_intrinsic <- grDevices::colorRampPalette(
+  c("#006400","#076b3e","#228B22","#32c080","#90EE90"))
+pal_motor     <- grDevices::colorRampPalette(
+  c("#8f0723","#DC143C","#FF4500","#FF7F50","#F88379","#FFB6C1"))
+
+make_panel <- function(neurons, view, palette, label, label_colour) {
+  rotation <- banc_rotation_matrices[[view]]
+  ggplot() +
+    nat.ggplot::geom_neuron(
+      x = bancr::banc_vnc_neuropil.surf,
+      rotation_matrix = rotation,
+      alpha = 0.05, cols = c("grey90", "grey60")
+    ) +
+    nat.ggplot::geom_neuron(
+      x = banc_decapitate(neurons, invert = FALSE),
+      rotation_matrix = rotation,
+      cols = palette(length(neurons)),
+      alpha = 0.85, linewidth = 0.3
+    ) +
+    coord_fixed() +
+    theme_void() +
+    ggtitle(label) +
+    theme(
+      plot.title = element_text(hjust = 0, size = 9,
+                                face = "bold", colour = label_colour),
+      legend.position = "none"
+    )
+}
+
+groups <- list(
+  sensory   = list(neurons = sens_m, palette = pal_sensory,   colour = "#1E90FF"),
+  intrinsic = list(neurons = intr_m, palette = pal_intrinsic, colour = "#228B22"),
+  motor     = list(neurons = mot_m,  palette = pal_motor,     colour = "#DC143C")
 )
+
+views <- c(dorsal = "vnc", lateral = "vnc_side")
+
+panels <- list()
+for (v in names(views)) {
+  for (g in names(groups)) {
+    panels[[paste(v, g, sep = "_")]] <- make_panel(
+      groups[[g]]$neurons,
+      views[[v]],
+      groups[[g]]$palette,
+      sprintf("%s — %s", g, v),
+      groups[[g]]$colour
+    )
+  }
+}
+
+patchwork::wrap_plots(panels, ncol = 3)
 ```
 
-![Sample left-front-leg sensory, intrinsic, and motor neurons in the
-VNC](front_leg_sensorimotor_files/figure-html/mini-render-1.png)
+![Sample left-front-leg sensory, intrinsic and motor neurons in the VNC,
+each group in its own colour ramp, shown in dorsal and lateral
+views](front_leg_sensorimotor_files/figure-html/mini-render-1.png)
 
 The motor and intrinsic arbours hug the left T1 neuromere, and the
 sensory afferents enter through the front-leg nerve and ramify in the
@@ -252,11 +315,11 @@ scene_url <- fafbseg::ngl_add_colours(
 
 short_url <- banc_shorturl(scene_url)
 short_url
-#> [1] "https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/4935224596103168"
+#> [1] "https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/5018684501262336"
 ```
 
 [Open the front-leg sensorimotor scene in
-Spelunker](https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/4935224596103168)
+Spelunker](https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/5018684501262336)
 
 The Neuroglancer scene shows the **836** sensory neurons in blue, the
 **255** single-leg-neuromere intrinsic neurons in green, and the **69**
