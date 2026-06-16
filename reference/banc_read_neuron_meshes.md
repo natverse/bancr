@@ -5,7 +5,7 @@ Read one or more BANC neuron and nuclei meshes
 ## Usage
 
 ``` r
-banc_read_neuron_meshes(ids, savedir = NULL, format = c("ply", "obj"), ...)
+banc_read_neuron_meshes(ids, savedir = NULL, format = c("obj", "ply"), ...)
 
 banc_read_mitochondria_mesh(
   ids,
@@ -38,8 +38,10 @@ banc_read_nuclei_mesh(
 
 - format:
 
-  whether to save meshes in Wavefront obj or Stanford poly format. obj
-  is the default but ply is a simpler and more compact format.
+  Mesh on-the-wire format. `"obj"` (default) needs no extra dependency.
+  `"ply"` is more compact but requires the `Rvcg` package; passing
+  `format = "ply"` without `Rvcg` installed previously caused a silent
+  empty return — an explicit error is now raised in that case.
 
 - ...:
 

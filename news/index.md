@@ -2,6 +2,13 @@
 
 ## bancr 0.3.3 (development)
 
+- [`banc_read_neuron_meshes()`](https://natverse.github.io/bancr/reference/banc_read_neuron_meshes.md)
+  now defaults to `format = "obj"` and emits an explicit error if the
+  user requests `format = "ply"` while the suggested `Rvcg` package is
+  missing. Previously the `.ply` path could return an empty `neuronlist`
+  without warning when `Rvcg` was unavailable. Thanks to
+  [@JiajunZhang-neu](https://github.com/JiajunZhang-neu) for the
+  diagnosis ([\#17](https://github.com/natverse/bancr/issues/17)).
 - New pkgdown article *“Front-leg sensorimotor loops”* under
   `vignettes/articles/` — walks through
   [`banc_codex_annotations()`](https://natverse.github.io/bancr/reference/banc_codex_annotations.md),
