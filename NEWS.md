@@ -1,5 +1,10 @@
 # bancr 0.3.3 (development)
 
+* `banc_read_neuron_meshes()` now defaults to `format = "obj"` and
+  emits an explicit error if the user requests `format = "ply"` while
+  the suggested `Rvcg` package is missing. Previously the `.ply` path
+  could return an empty `neuronlist` without warning when `Rvcg` was
+  unavailable. Thanks to @JiajunZhang-neu for the diagnosis (#17).
 * New pkgdown article *"Front-leg sensorimotor loops"* under
   `vignettes/articles/` — walks through `banc_codex_annotations()`,
   `banc_partner_summary()` and `banc_scene()` to identify

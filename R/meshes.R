@@ -8,9 +8,13 @@
 #' good overall morphology while 3 is also useful and smaller still).
 #' @param method How to treat the mesh object returned from neuroglancer, i.e. as
 #' a \code{mesh3d} object or a \code{ply} mesh.
+#' @param format Mesh on-the-wire format. \code{"obj"} (default) needs no
+#'   extra dependency. \code{"ply"} is more compact but requires the
+#'   \code{Rvcg} package; passing \code{format = "ply"} without
+#'   \code{Rvcg} installed previously caused a silent empty return —
+#'   an explicit error is now raised in that case.
 #' @param ... Additional arguments passed to
 #'   \code{\link[fafbseg]{read_cloudvolume_meshes}}
-#' @inheritParams fafbseg::save_cloudvolume_meshes
 #'
 #' @return A \code{\link[nat]{neuronlist}} containing one or more \code{mesh3d}
 #'   objects. See \code{\link[nat]{read.neurons}} for details.
@@ -23,9 +27,14 @@
 #' nucleus.mesh <- banc_read_nuclei_mesh("72903876004544795")
 #' plot3d(nucleus.mesh, col = "black")
 #' }
-banc_read_neuron_meshes <- function(ids, savedir=NULL, format=c("ply", "obj"), ...) {
-  format=match.arg(format)
-  with_banc(read_cloudvolume_meshes(ids, savedir = savedir, format=format, ...))
+banc_read_neuron_meshes <- function(ids, savedir=NULL, format=c("obj", "ply"), ...) {
+  format <- match.arg(format)
+  if (format == "ply" && !requireNamespace("Rvcg", quietly = TRUE)) {
+    stop("`format = \"ply\"` requires the suggested package `Rvcg`. ",
+         "Install it with `install.packages(\"Rvcg\")`, or call ",
+         "`banc_read_neuron_meshes(..., format = \"obj\")` instead.")
+  }
+  with_banc(read_cloudvolume_meshes(ids, savedir = savedir, format = format, ...))
 }
 
 #' @export

@@ -6,7 +6,7 @@
 \alias{banc_read_nuclei_mesh}
 \title{Read one or more BANC neuron and nuclei meshes}
 \usage{
-banc_read_neuron_meshes(ids, savedir = NULL, format = c("ply", "obj"), ...)
+banc_read_neuron_meshes(ids, savedir = NULL, format = c("obj", "ply"), ...)
 
 banc_read_mitochondria_mesh(
   ids,
@@ -31,8 +31,11 @@ banc_read_nuclei_mesh(
 simple but effective cache since flywire neurons change id whenever they
 are edited.}
 
-\item{format}{whether to save meshes in Wavefront obj or Stanford poly
-format. obj is the default but ply is a simpler and more compact format.}
+\item{format}{Mesh on-the-wire format. \code{"obj"} (default) needs no
+extra dependency. \code{"ply"} is more compact but requires the
+\code{Rvcg} package; passing \code{format = "ply"} without
+\code{Rvcg} installed previously caused a silent empty return —
+an explicit error is now raised in that case.}
 
 \item{...}{Additional arguments passed to
 \code{\link[fafbseg]{read_cloudvolume_meshes}}}
