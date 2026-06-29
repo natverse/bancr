@@ -329,6 +329,7 @@ register_banc_coconat <- function(showerror=TRUE){
     name = 'banc',
     shortname = 'bc',
     namespace = 'coconatfly',
+    sex = "F",
     metafun = coconat_banc_meta,
     idfun = coconat_banc_ids,
     partnerfun = coconat_banc_partners
