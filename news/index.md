@@ -1,6 +1,6 @@
 # Changelog
 
-## bancr 0.3.3 (development)
+## bancr 0.3.6 (development)
 
 - [`banc_read_neuron_meshes()`](https://natverse.github.io/bancr/reference/banc_read_neuron_meshes.md)
   now defaults to `format = "obj"` and emits an explicit error if the

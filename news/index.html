@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bancr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.3" id="bancr-033-development">bancr 0.3.3 (development)<a class="anchor" aria-label="anchor" href="#bancr-033-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.6" id="bancr-036-development">bancr 0.3.6 (development)<a class="anchor" aria-label="anchor" href="#bancr-036-development"></a></h2>
 <ul><li>
 <code><a href="../reference/banc_read_neuron_meshes.html">banc_read_neuron_meshes()</a></code> now defaults to <code>format = "obj"</code> and emits an explicit error if the user requests <code>format = "ply"</code> while the suggested <code>Rvcg</code> package is missing. Previously the <code>.ply</code> path could return an empty <code>neuronlist</code> without warning when <code>Rvcg</code> was unavailable. Thanks to <a href="https://github.com/JiajunZhang-neu" class="external-link">@JiajunZhang-neu</a> for the diagnosis (<a href="https://github.com/natverse/bancr/issues/17" class="external-link">#17</a>).</li>
 <li>New pkgdown article <em>“Front-leg sensorimotor loops”</em> under <code>vignettes/articles/</code> — walks through <code><a href="../reference/banc_codex_annotations.html">banc_codex_annotations()</a></code>, <code><a href="../reference/banc_partner_summary.html">banc_partner_summary()</a></code> and <code><a href="../reference/banc_scene.html">banc_scene()</a></code> to identify single-leg-neuromere intrinsic neurons that close a monosynaptic loop between left front-leg sensory and motor neurons, then renders the three groups as a coloured public Neuroglancer scene and as a 3 × 2 nat.ggplot panel of mesh renderings (one column per group, two VNC views). Lives at <a href="https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html" class="uri">https://natverse.github.io/bancr/articles/front_leg_sensorimotor.html</a> after the next pkgdown deploy.</li>
