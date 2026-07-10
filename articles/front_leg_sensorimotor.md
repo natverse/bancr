@@ -315,11 +315,11 @@ scene_url <- fafbseg::ngl_add_colours(
 
 short_url <- banc_shorturl(scene_url)
 short_url
-#> [1] "https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6577367509106688"
+#> [1] "https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6393410721153024"
 ```
 
 [Open the front-leg sensorimotor scene in
-Spelunker](https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6577367509106688)
+Spelunker](https://spelunker.cave-explorer.org/#!middleauth+https://global.daf-apis.com/nglstate/api/v1/6393410721153024)
 
 The Neuroglancer scene shows the **836** sensory neurons in blue, the
 **255** single-leg-neuromere intrinsic neurons in green, and the **69**
