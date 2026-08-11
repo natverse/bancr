@@ -1,3 +1,17 @@
+# bancr 0.3.7 (development)
+
+* bancr now depends on [seatabler](https://github.com/flyconnectome/seatabler),
+  the generic SeaTable client, and the BANC server configuration lives in one
+  place: `banc_seatable_connection()`. The `banctable_*` names and signatures
+  are unchanged.
+* `banctable_columns()`, `banctable_add_column()`, `banctable_add_columns()` and
+  `banctable_delete_column()` are now exported rather than internal.
+* `banctable_set_token()` no longer appends a duplicate line to `~/.Renviron`,
+  and correctly sets `BANCTABLE_TOKEN` for the current session. It previously
+  set a variable called `banctable_TOKEN`, which nothing read.
+* `banctable_move_to_bigdata()` and `banctable_append_rows(bigdata = TRUE)` now
+  go through seatabler's REST transport rather than their own httr2 pipelines.
+
 # bancr 0.3.6 (development)
 
 * `banc_read_neuron_meshes()` now defaults to `format = "obj"` and
