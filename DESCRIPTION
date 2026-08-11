@@ -40,7 +40,8 @@ Imports:
     pbapply,
     utils,
     reticulate,
-    nat.ggplot
+    nat.ggplot,
+    seatabler
 Suggests:
     testthat (>= 3.0.0),
     readobj,
@@ -84,7 +85,8 @@ Remotes:
     eliocamp/ggnewscale,
     natverse/coconat,
     natverse/coconatfly,
-    natverse/nat.ggplot
+    natverse/nat.ggplot,
+    flyconnectome/seatabler
 Config/testthat/edition: 3
 LazyDataCompression: xz
 Encoding: UTF-8
