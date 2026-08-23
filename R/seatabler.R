@@ -7,10 +7,11 @@
 # code lives in one place. The banctable_* names and signatures are unchanged:
 # there is a lot of analysis code calling them.
 #
-# Not everything has moved yet. banctable_query()'s row conversion and
-# banctable_update_rows() / banctable_append_rows() still use fafbseg helpers
-# that seatabler has not ported (flytable_fix_coltypes, df2flytable,
-# df2appendpayload); they move across once those land.
+# Not everything has moved. banctable_query() still uses bancr's own row
+# conversion: seatable_query() does not apply column types, so delegating it
+# would change 11 column classes on banc_meta, including status and
+# cell_type_source becoming list columns and _ctime/_mtime losing POSIXct.
+# See flyconnectome/seatabler#9. The row writes moved in bancr 0.3.8.
 
 #' The BANC SeaTable connection
 #'

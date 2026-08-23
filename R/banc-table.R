@@ -248,54 +248,14 @@ banctable_update_rows <- function (df,
                                    workspace_id = "57832",
                                    token_name = "BANCTABLE_TOKEN",
                                    ...) {
-  df <- as.data.frame(df)
-  if (is.character(base) || is.null(base))
-    base = banctable_base(base_name = base, table = table, workspace_id = workspace_id, token_name = token_name)
-  nx <- nrow(df)
-  if (!isTRUE(nx > 0)) {
-    warning("No rows to update in `df`!")
-    return(TRUE)
-  }
-  tablecols = fafbseg::flytable_columns(table,base)
-  df = fafbseg:::df2flytable(df, append = ifelse(append_allowed, NA,FALSE))
-  newrows = is.na(df[["row_id"]])
-  if (any(newrows)) {
-    stop("Adding new rows not yet implemented")
-    banctable_append_rows(df[newrows, , drop = FALSE], table = table,
-                         base = base, chunksize = chunksize, ...)
-    df = df[!newrows, , drop = FALSE]
-    nx = nrow(df)
-  }
-  if (!isTRUE(nx > 0))
-    return(TRUE)
-  if (nx > chunksize) {
-    nchunks = ceiling(nx/chunksize)
-    chunkids = rep(seq_len(nchunks), rep(chunksize, nchunks))[seq_len(nx)]
-    chunks = split(df, chunkids)
-    if (!requireNamespace("pbapply", quietly = TRUE)) {
-      stop("Package pbapply is required for this function. Please install it with: install.packages('pbapply')")
-    }
-    oks = pbapply::pbsapply(chunks, banctable_update_rows,
-                            table = table, base = base, chunksize = Inf, append_allowed = FALSE,
-                            ...)
-    return(all(oks))
-  }
-  multi = tablecols$name[tablecols$type=="multiple-select"]
-  if(length(multi)){
-    i = intersect(colnames(df),multi)
-    if(length(i)){
-      for(j in i){
-        df[[j]][is.na(df[[j]])] = ''
-        l = sapply(df[[j]], strsplit, split = ",|, ")
-        l = unname(l)
-        df[[j]] = l
-      }
-    }
-  }
-  pyl = banc_df2updatepayload(df, via_json = TRUE)
-  res = base$batch_update_rows(table_name = table, rows_data = pyl)
-  ok = isTRUE(all.equal(res, list(success = TRUE)))
-  return(ok)
+  con <- banc_seatable_connection(token_name = token_name,
+                                  workspace_id = workspace_id)
+  # seatabler detects multiple-select columns from the table schema and routes
+  # them through its own list-per-cell path, so the comma-splitting bancr used
+  # to do by hand is no longer needed here.
+  seatabler::seatable_update_rows(df = df, table = table, base = base,
+                                  con = con, append_allowed = append_allowed,
+                                  chunksize = chunksize, ...)
 }
 
 # hidden
@@ -529,198 +489,18 @@ banctable_append_rows <- function (df,
                                    workspace_id = "57832",
                                    token_name = "BANCTABLE_TOKEN",
                                    ...) {
-  if (is.character(base) || is.null(base)){
-    base <- banctable_base(base_name = base, table = table, workspace_id = workspace_id, token_name = token_name)
-  }
-  nx = nrow(df)
-  if (!isTRUE(nx > 0)) {
-    warning("No rows to append in `df`!")
-    return(TRUE)
-  }
-  df = fafbseg:::df2flytable(df, append = TRUE)
-  if (nx > chunksize) {
-    nchunks = ceiling(nx/chunksize)
-    chunkids = rep(seq_len(nchunks), rep(chunksize, nchunks))[seq_len(nx)]
-    chunks = split(df, chunkids)
-    if (!requireNamespace("pbapply", quietly = TRUE)) {
-      stop("Package pbapply is required for this function. Please install it with: install.packages('pbapply')")
-    }
-    oks = pbapply::pbsapply(chunks, banctable_append_rows,
-                            table = table, base = base, chunksize = Inf, bigdata = bigdata,
-                            ...)
-    return(all(oks))
-  }
-  pyl = fafbseg:::df2appendpayload(df)
-  if(!bigdata){
-    res = base$batch_append_rows(table_name = table, rows_data = pyl)
-    ok = isTRUE(all.equal(res[["inserted_row_count"]], nx))
-    return(ok)
-  }else{
-    # The big data backend has no SDK method, so it goes over the API gateway.
-    # seatabler::seatable_base_rest() supplies the base JWT, the HTTP/1.1 pin
-    # and the NA -> null encoding that endpoint needs.
-    result <- seatabler::seatable_base_rest(
-      "add-archived-rows/", base = base,
-      con = banc_seatable_connection(token_name = token_name,
-                                     workspace_id = workspace_id),
-      method = "POST",
-      body = list(table_name = table, rows = reticulate::py_to_r(pyl)))
-    return(isTRUE(result$success == TRUE))
-  }
+  con <- banc_seatable_connection(token_name = token_name,
+                                  workspace_id = workspace_id)
+  # bigdata rows go to the api-gateway add-archived-rows endpoint; seatabler
+  # handles both that and the ordinary SDK path.
+  seatabler::seatable_append_rows(df = df, table = table, base = base,
+                                  con = con, bigdata = bigdata,
+                                  chunksize = chunksize, ...)
 }
 
-# modified to enable list uploads to multi-select columns
-banc_df2updatepayload <- function(x, via_json = TRUE){
-  if (via_json) {
-    othercols <- setdiff(colnames(x), "row_id")
-    listcols <- names(x)[sapply(x, is.list)]
-    listcols <- intersect(othercols, listcols)
-    updates <- list()
-    for(i in 1:nrow(x)){
-      updates[[i]] <- list(row_id = x[i, "row_id"], row = as.list(x[i,othercols, drop = FALSE]))
-      for(col in listcols){
-        if(length((x[i,][[col]][[1]]))==1){
-          updates[[i]]$row[[col]] <- x[i,][[col]]
-        }else{
-          updates[[i]]$row[[col]] <- x[i,][[col]][[1]]
-        }
-      }
-    }
-    js <- jsonlite::toJSON(updates, auto_unbox = TRUE, na = "null")
-    pyjson <- reticulate::import("json")
-    pyl <- reticulate::py_call(pyjson$loads, js)
-    return(pyl)
-  }
-  pdf = reticulate::r_to_py(x)
-  pyfun = fafbseg:::df2updatepayload_py()
-  reticulate::py_call(pyfun$pdf2list, pdf)
-}
+# banctable_update_rows()'s multi-select payload builder retired: seatabler
+# builds the payload now.
 
-# banctable_columns(), banctable_add_column(), banctable_add_columns() and
-# banctable_delete_column() now live in R/seatabler.R, wrapping their
-# seatabler::seatable_* equivalents.
-
-# hidden
-# Update SeaTable columns for neurons selected in a Neuroglancer scene.
-#
-# Takes a Neuroglancer short URL, extracts the root IDs from the
-# "segmentation proofreading" layer, shows the current SeaTable values
-# for the target columns, asks for confirmation, then updates.
-#
-# @param url A Neuroglancer short URL.
-# @param entries Character vector of "column:value" pairs, e.g.
-#   \code{c("cell_type:DNa01", "super_class:descending")}.
-# @param layer Neuroglancer layer to extract IDs from.
-# @param update.ids If TRUE, run \code{banc_latestid} on the IDs first.
-# @param table,base,workspace_id,token_name SeaTable connection arguments
-#   (defaults match \code{banctable_query}).
-banctable_ngl_update <- function(url,
-                                 entries,
-                                 layer = "segmentation proofreading",
-                                 update.ids = FALSE,
-                                 table = "banc_meta",
-                                 base = NULL,
-                                 workspace_id = "57832",
-                                 token_name = "BANCTABLE_TOKEN") {
-  # Parse entries: "column:value" format
-  if (!is.character(entries) || !length(entries))
-    stop("'entries' must be a character vector of 'column:value' pairs")
-  has_colon <- grepl(":", entries, fixed = TRUE)
-  if (any(!has_colon))
-    stop("Invalid entries (missing ':'): ",
-         paste(entries[!has_colon], collapse = ", "),
-         "\n  Expected format: c(\"cell_type:DNa01\", \"super_class:descending\")")
-  cols <- sub(":.*", "", entries)
-  vals <- sub("^[^:]*:", "", entries)
-
-  # Validate column names against SeaTable schema
-  col_info <- banctable_columns(table = table, base = base,
-                                workspace_id = workspace_id,
-                                token_name = token_name)
-  bad_cols <- setdiff(cols, col_info$name)
-  if (length(bad_cols))
-    stop("Invalid column name(s): ", paste(bad_cols, collapse = ", "),
-         "\n  Available: ", paste(col_info$name, collapse = ", "))
-
-  # Decode neuroglancer state from short URL
-  url2 <- sub("#!middleauth+", "?", url, fixed = TRUE)
-  parts <- unlist(strsplit(url2, "?", fixed = TRUE))
-  json <- fafbseg::flywire_fetch(parts[2], token = banc_token(),
-                                  return = "text", cache = TRUE)
-  sc <- fafbseg::ngl_decode_scene(
-    safe_ngl_encode_url(json, baseurl = parts[1]))
-
-  # Find the target layer and extract selected segments
-  layers <- fafbseg::ngl_layers(sc)
-  nls <- fafbseg:::ngl_layer_summary(layers)
-  sel <- match(layer, nls$name)
-  if (is.na(sel))
-    stop("Layer '", layer, "' not found. Available: ",
-         paste(nls$name, collapse = ", "))
-  ids <- sc[["layers"]][[sel]][["segments"]]
-  ids <- as.character(ids)
-  ids <- ids[nzchar(ids) & ids != "0"]
-  message(sprintf("Found %d root IDs in layer '%s'", length(ids), layer))
-  if (!length(ids)) {
-    message("Nothing to update.")
-    return(invisible(NULL))
-  }
-
-  # Optionally update to latest root IDs
-  if (update.ids) {
-    message("Updating root IDs to latest...")
-    ids <- banc_latestid(ids)
-    ids <- as.character(ids)
-    ids <- ids[nzchar(ids) & ids != "0"]
-    message(sprintf("  %d root IDs after update", length(ids)))
-  }
-
-  # Look up matched rows in SeaTable, including target columns
-  select_cols <- unique(c("_id", "root_id", cols))
-  bt <- banctable_query(
-    sql = sprintf("SELECT %s FROM %s",
-                  paste(sprintf("`%s`", select_cols), collapse = ", "), table),
-    token_name = token_name, workspace_id = workspace_id)
-  matched <- bt[bt$root_id %in% ids, ]
-  missing <- setdiff(ids, matched$root_id)
-  if (length(missing))
-    warning(length(missing), " root IDs not found in SeaTable: ",
-            paste(utils::head(missing, 5), collapse = ", "),
-            if (length(missing) > 5) ", ...")
-  message(sprintf("Matched %d / %d root IDs in SeaTable", nrow(matched), length(ids)))
-  if (!nrow(matched)) {
-    message("No rows to update.")
-    return(invisible(NULL))
-  }
-
-  # Show current values for the target columns
-  show_cols <- intersect(c("root_id", cols), colnames(matched))
-  message("\nCurrent values:")
-  print(matched[, show_cols, drop = FALSE], right = FALSE)
-  message(sprintf("\nProposed update: %s",
-                  paste(sprintf("%s -> '%s'", cols, vals), collapse = ", ")))
-
-  # Ask user for confirmation
-  ans <- readline(prompt = "Proceed with update? (y/n): ")
-  if (!tolower(trimws(ans)) %in% c("y", "yes")) {
-    message("Update cancelled.")
-    return(invisible(matched[, show_cols, drop = FALSE]))
-  }
-
-  # Build update data.frame
-  df_update <- data.frame(`_id` = matched$`_id`, stringsAsFactors = FALSE,
-                          check.names = FALSE)
-  for (i in seq_along(cols))
-    df_update[[cols[i]]] <- vals[i]
-
-  # Push
-  banctable_update_rows(df = df_update, table = table, base = base,
-                        workspace_id = workspace_id, token_name = token_name,
-                        append_allowed = FALSE)
-  message(sprintf("Updated %d column(s) for %d rows",
-                  length(cols), nrow(df_update)))
-  invisible(matched[, show_cols, drop = FALSE])
-}
 
 # hidden, modified to enable working with list columns
 banctable2df <- function (df, tidf = NULL) {
