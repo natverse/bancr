@@ -222,23 +222,19 @@ banctable_set_token <- function(user,
                                 pwd,
                                 url = "https://cloud.seatable.io/",
                                 token_name = "BANCTABLE_TOKEN"){
-  st <- fafbseg:::check_seatable()
-  ac <- reticulate::py_call(st$Account, login_name = user,
-                            password = pwd, server_url = url)
-  ac$auth()
-  Sys.setenv(banctable_TOKEN = ac$token)
-  cat(token_name,"='", ac$token, "'
-", sep = "", append = TRUE,
-      file = path.expand("~/.Renviron"))
-  return(invisible(NULL))
+  con <- banc_seatable_connection(token_name = token_name, url = url)
+  # seatabler replaces an existing line in ~/.Renviron rather than appending a
+  # second one, and sets the variable for this session too.
+  seatabler::seatable_generate_token(user = user, pwd = pwd, con = con)
+  invisible(NULL)
 }
 
 #' @export
 #' @rdname banctable_query
 banctable_login <- function(url = "https://cloud.seatable.io/",
                             token_name = "BANCTABLE_TOKEN"){
-  token = Sys.getenv(token_name, unset = NA_character_)
-  fafbseg::flytable_login(url=url, token=token)
+  con <- banc_seatable_connection(token_name = token_name, url = url)
+  seatabler::seatable_login(con = con)
 }
 
 
@@ -303,68 +299,34 @@ banctable_update_rows <- function (df,
 }
 
 # hidden
+# The BANC base object. seatabler::seatable_base() already memoises the base and
+# re-fetches it when the JWT is close to expiry, so this is now just the BANC
+# connection bound to that generic.
 banctable_base <- function(base_name = "banc_meta",
-                            table = NULL,
-                            url = "https://cloud.seatable.io/",
-                            token_name = "BANCTABLE_TOKEN",
-                            workspace_id = "57832",
-                            cached = TRUE,
-                            ac = NULL) {
-  if(is.null(ac)) ac <- banctable_login(token_name=token_name)
-  if (!cached) {
-    if (requireNamespace("memoise", quietly = TRUE)) {
-      memoise::forget(banctable_base_impl)
-    }
-  }
-  base = try({
-    banctable_base_impl(table = table, base_name = base_name,
-                       url = url, workspace_id = workspace_id)
-  }, silent = TRUE)
-  stale_token <- isTRUE(try(difftime(base$jwt_exp, Sys.time(),
-                                     units = "hours") < 1, silent = T))
-  retry = (cached && inherits(base, "try-error")) || stale_token
-  if (!retry)
-    return(base)
-  if (requireNamespace("memoise", quietly = TRUE)) {
-    memoise::forget(banctable_base_impl)
-  }
-  banctable_base_impl(table = table,
-                      base_name = base_name,
-                      url = url,
-                      workspace_id = workspace_id,
-                      token_name = token_name)
+                           table = NULL,
+                           url = "https://cloud.seatable.io/",
+                           token_name = "BANCTABLE_TOKEN",
+                           workspace_id = "57832",
+                           cached = TRUE,
+                           ac = NULL) {
+  # `ac` is accepted for backwards compatibility and ignored: seatabler logs in
+  # from the connection itself.
+  con <- banc_seatable_connection(token_name = token_name, url = url,
+                                  workspace_id = workspace_id)
+  seatabler::seatable_base(base_name = base_name, table = table, con = con,
+                           workspace_id = workspace_id, cached = cached)
 }
 
 # hidden
-banctable_base_impl <- function (base_name = "banc_meta",
-                                 table = NULL,
-                                 url = "https://cloud.seatable.io/",
-                                 workspace_id = "57832",
-                                 token_name = "BANCTABLE_TOKEN",
-                                 ac = NULL){
-    if(is.null(ac)) ac <- banctable_login(token_name=token_name)
-    if (is.null(base_name) && is.null(table))
-      stop("you must supply one of base or table name!")
-    if (is.null(base_name)) {
-      base = fafbseg:::flytable_base4table(table, ac = ac, cached = F)
-      return(invisible(base))
-    }
-    if (is.null(workspace_id)) {
-      wsdf = fafbseg:::flytable_workspaces(ac = ac)
-      wsdf.sel = subset(wsdf, wsdf$name == base_name)
-      if (nrow(wsdf.sel) == 0)
-        stop("Unable to find a workspace containing basename:",
-             base_name, "
-Check basename and/or access permissions.")
-      if (nrow(wsdf.sel) > 1)
-        stop("Multiple workspaces containing basename:",
-             base_name, "
-You must use banctable_base() specifying a workspace_id to resolve this ambiguity.")
-      workspace_id = wsdf.sel[["workspace_id"]]
-    }
-    base = reticulate::py_call(ac$get_base, workspace_id = workspace_id,
-                               base_name = base_name)
-    base
+# Kept as an alias so older internal callers keep working.
+banctable_base_impl <- function(base_name = "banc_meta",
+                                table = NULL,
+                                url = "https://cloud.seatable.io/",
+                                workspace_id = "57832",
+                                token_name = "BANCTABLE_TOKEN",
+                                ac = NULL) {
+  banctable_base(base_name = base_name, table = table, url = url,
+                 token_name = token_name, workspace_id = workspace_id)
 }
 
 #' @export
@@ -379,126 +341,23 @@ banctable_move_to_bigdata <- function(table = "banc_meta",
                                       where = NULL,
                                       invert = FALSE,
                                       row_ids = NULL){
-
-  # Deprecation warning for 'where' parameter
   if (!is.null(where)) {
-    warning("The 'where' parameter is deprecated. The SeaTable API now requires 'view_name' or 'view_id' instead of WHERE clauses. Please specify a view containing the rows you want to archive.")
+    warning("The 'where' parameter is deprecated. SeaTable now archives the ",
+            "rows of a view, so pass 'view_name' or 'view_id' instead.")
   }
-
-  # Validation for archive operation
-  if (!invert) {
-    if (is.null(view_name) && is.null(view_id)) {
-      stop("For archive operation, you must provide either 'view_name' or 'view_id'. The API no longer supports WHERE clauses.")
-    }
-    if (!is.null(view_name) && !is.null(view_id)) {
-      stop("Please provide either 'view_name' OR 'view_id', not both.")
-    }
+  con <- banc_seatable_connection(token_name = token_name, url = url,
+                                  workspace_id = workspace_id)
+  if (invert) {
+    seatabler::seatable_unarchive_rows(table = table, row_ids = row_ids,
+                                       base = base, con = con)
+  } else {
+    # seatabler wants exactly one of the two; drop this function's default
+    # view_name when the caller gave a view_id instead.
+    if (!is.null(view_id)) view_name <- NULL
+    seatabler::seatable_archive_rows(table = table, view_name = view_name,
+                                     view_id = view_id, base = base, con = con)
   }
-
-  # Validation for unarchive operation
-  if (invert && is.null(row_ids)) {
-    stop("For unarchive operation (invert=TRUE), you must provide 'row_ids'.")
-  }
-
-  # get base
-  ac <- banctable_login(token_name=token_name)
-  base <- banctable_base_impl(table = table,
-                              base_name = base,
-                              url = url,
-                              workspace_id = workspace_id)
-  base_uuid <- base$dtable_uuid
-  token <- base$jwt_token
-
-  # Remove any protocol prefix if present
-  server <- gsub("^https?://", "", base$server_url)
-  server <- gsub("/$", "", server)
-
-  # Construct the URL
-  if(invert){
-    movement <- "unarchive"
-  }else{
-    movement <- "archive-view"
-  }
-  endpoint <- sprintf("https://%s/api-gateway/api/v2/dtables/%s/%s/", server, base_uuid, movement)
-
-  # Prepare the request body
-  if(invert){
-    # For unarchive, use table_id (not table_name)
-    body <- list(table_id = table)
-    body$row_ids <- as.list(row_ids)
-  }else{
-    # For archive-view, use table_name and view_name/view_id
-    body <- list(table_name = table)
-
-    # Add view_name or view_id (required by API)
-    if (!is.null(view_name)) {
-      body$view_name <- view_name
-    } else if (!is.null(view_id)) {
-      body$view_id <- view_id
-    }
-  }
-
-  # Make the request
-  response <- httr2::request(endpoint) %>%
-    httr2::req_options(http_version = 2) %>%  # Force HTTP/1.1 (curl constant: 2) to avoid HTTP/2 framing errors
-    httr2::req_headers(
-      "Authorization" = sprintf("Bearer %s", token),
-      "Accept" = "application/json",
-      "Content-Type" = "application/json"
-    ) %>%
-    httr2::req_body_json(body, na = "null") %>%  # NA → JSON null; SeaTable rejects the default "NA" string in number columns
-    httr2::req_error(is_error = function(resp) FALSE) %>%  # This allows us to handle errors manually
-    httr2::req_perform()
-
-  # Check for successful response
-  if (httr2::resp_status(response) != 200) {
-      # Try to get error message from response body
-      error_msg <- tryCatch({
-        if (httr2::resp_content_type(response) == "application/json") {
-          error_content <- httr2::resp_body_json(response)
-        } else {
-          # If not JSON, get the raw text
-          httr2::resp_body_string(response)
-        }
-      }, error = function(e) {
-        "Could not parse error message"
-    })
-   stop(error_msg)
-  }
-
-  # Return the response
-  invisible()
 }
-
-# import requests
-#
-# url = "https://cloud.seatable.io/api-gateway/api/v2/dtables/cc271335-227d-4bc7-94bb-1b5ae8816bd0/unarchive/"
-#
-# payload = {
-#   "row_ids": ["FoDxhChYQSycLm88JZ11RA"],
-#   "table_id": "franken_meta"
-# }
-# headers = {
-#   "content-type": "application/json",
-#   "authorization": "Bearer XX"
-#
-# response = requests.post(url, json=payload, headers=headers)
-#
-# print(response.text)
-
-# ## in python:
-# url = "https://cloud.seatable.io/api-gateway/api/v2/dtables/397da290-5aec-44dc-8a05-e2f58254d84a/archive-view/"
-# headers = {
-#   "accept": "application/json",
-#   "content-type": "application/json",
-#   "authorization": "Bearer MY_TOKEN"
-# }
-# body = {
-#   "table_name": "banc_meta",
-#   "where": "`cell_class` = 'glia'"
-# }
-# response = requests.post(url, headers=headers, json=body)
-# print(response.text)
 
 #' Read harmonised meta-data tables for the external connectomes
 #'
@@ -697,59 +556,16 @@ banctable_append_rows <- function (df,
     ok = isTRUE(all.equal(res[["inserted_row_count"]], nx))
     return(ok)
   }else{
-    # Use REST API for big data backend
-    base_uuid <- base$dtable_uuid
-    token <- base$jwt_token
-    server <- gsub("^https?://", "", base$server_url)
-    server <- gsub("/$", "", server)
-
-    # Construct the endpoint for adding rows to big data backend
-    endpoint <- sprintf("https://%s/api-gateway/api/v2/dtables/%s/add-archived-rows/", server, base_uuid)
-
-    # Convert Python payload to R list for JSON
-    rows_list <- reticulate::py_to_r(pyl)
-
-    # Prepare the request body
-    body <- list(
-      table_name = table,
-      rows = rows_list
-    )
-
-    # Make the request
-    response <- httr2::request(endpoint) %>%
-      httr2::req_options(http_version = 2) %>%  # Force HTTP/1.1 to avoid HTTP/2 framing errors
-      httr2::req_headers(
-        "Authorization" = sprintf("Bearer %s", token),
-        "Accept" = "application/json",
-        "Content-Type" = "application/json"
-      ) %>%
-      httr2::req_body_json(body, na = "null") %>%  # NA → JSON null; SeaTable rejects the default "NA" string in number columns
-      httr2::req_error(is_error = function(resp) FALSE) %>%
-      httr2::req_perform()
-
-    # Check for successful response
-    if (httr2::resp_status(response) != 200) {
-      error_msg <- tryCatch({
-        if (httr2::resp_content_type(response) == "application/json") {
-          error_content <- httr2::resp_body_json(response)
-          if (!is.null(error_content$error_message)) {
-            error_content$error_message
-          } else {
-            httr2::resp_body_string(response)
-          }
-        } else {
-          httr2::resp_body_string(response)
-        }
-      }, error = function(e) {
-        "Could not parse error message"
-      })
-      stop("Failed to append rows to big data backend: ", error_msg)
-    }
-
-    # Parse response to check inserted row count
-    result <- httr2::resp_body_json(response)
-    ok <- isTRUE(result$success == TRUE)
-    return(ok)
+    # The big data backend has no SDK method, so it goes over the API gateway.
+    # seatabler::seatable_base_rest() supplies the base JWT, the HTTP/1.1 pin
+    # and the NA -> null encoding that endpoint needs.
+    result <- seatabler::seatable_base_rest(
+      "add-archived-rows/", base = base,
+      con = banc_seatable_connection(token_name = token_name,
+                                     workspace_id = workspace_id),
+      method = "POST",
+      body = list(table_name = table, rows = reticulate::py_to_r(pyl)))
+    return(isTRUE(result$success == TRUE))
   }
 }
 
@@ -780,162 +596,9 @@ banc_df2updatepayload <- function(x, via_json = TRUE){
   reticulate::py_call(pyfun$pdf2list, pdf)
 }
 
-# hidden
-# Returns column metadata for a seatable table, including the internal
-# column key (useful for debugging API errors that reference keys like "8blF").
-banctable_columns <- function(table,
-                              base = NULL,
-                              workspace_id = "57832",
-                              token_name = "BANCTABLE_TOKEN",
-                              include_key = TRUE) {
-  if (is.character(base) || is.null(base))
-    base <- banctable_base(base_name = base, table = table,
-                           workspace_id = workspace_id, token_name = token_name)
-  # Get base metadata
-  md <- base$get_metadata()
-  tablenames <- sapply(md$tables, '[[', 'name')
-  stopifnot(table %in% tablenames)
-  ti <- md$tables[[which(table == tablenames)]]
-
-  # Extract column info including key
-  ll <- lapply(ti$columns, function(x) {
-    fields <- c("key", "name", "type")
-    if (!include_key) fields <- c("name", "type")
-    vals <- x[fields]
-    vals[sapply(vals, is.null)] <- NA_character_
-    as.data.frame(vals, stringsAsFactors = FALSE, check.names = FALSE)
-  })
-  tidf <- dplyr::bind_rows(ll)
-
-  # Add R type mapping
-  tidf$rtype <- sapply(
-    tidf$type,
-    switch,
-    number = 'numeric',
-    checkbox = 'logical',
-    date = 'POSIXct',
-    mtime = 'POSIXct',
-    'character'
-  )
-  tidf
-}
-
-# hidden
-# Insert a new column into a SeaTable table. Wraps the seatable_api
-# `base.insert_column(table_name, column_name, column_type, ...)` call
-# so R-side migration / schema scripts can extend a base without
-# touching the SeaTable UI.
-#
-# `column_type` accepts SeaTable's vocabulary: most commonly "text",
-# "long-text", "number", "date", "checkbox", "single-select",
-# "multiple-select". See https://api.seatable.io/reference/insert-column-2
-# for the full list.
-#
-# Returns the SeaTable response (column dict) invisibly on success.
-banctable_add_column <- function(table,
-                                 column_name,
-                                 column_type = "text",
-                                 base = NULL,
-                                 column_data = NULL,
-                                 column_key = NULL,
-                                 workspace_id = "57832",
-                                 token_name = "BANCTABLE_TOKEN") {
-  if (is.character(base) || is.null(base)) {
-    base <- banctable_base(base_name = base, table = table,
-                           workspace_id = workspace_id,
-                           token_name = token_name)
-  }
-  # base$insert_column expects a ColumnTypes enum, not a raw string.
-  # ColumnTypes is a Python Enum; calling it like a constructor with the
-  # string value resolves to the matching member (e.g.
-  # `ColumnTypes("text")` returns `ColumnTypes.TEXT`). Import with
-  # `convert = FALSE` so reticulate doesn't auto-coerce the enum back
-  # to its `.value` string when it crosses the R↔Python boundary —
-  # that auto-coercion is what previously sent insert_column a raw
-  # string and triggered the SeaTable SDK's "'str' has no attribute
-  # 'value'" error.
-  col_constants <- reticulate::import("seatable_api.constants",
-                                       delay_load = FALSE,
-                                       convert = FALSE)
-  type_str <- as.character(column_type)
-  enum_val <- tryCatch(
-    col_constants$ColumnTypes(type_str),
-    error = function(e)
-      stop("Unknown SeaTable column_type '", type_str,
-           "'. Common types: text, long-text, number, date, checkbox, ",
-           "single-select, multiple-select. Original error: ",
-           conditionMessage(e))
-  )
-  kwargs <- list(
-    table_name = table,
-    column_name = column_name,
-    column_type = enum_val
-  )
-  if (!is.null(column_data)) kwargs$column_data <- column_data
-  if (!is.null(column_key)) kwargs$column_key <- column_key
-  res <- do.call(base$insert_column, kwargs)
-  invisible(res)
-}
-
-# hidden
-# Batch-add multiple columns to a SeaTable table. `columns` is a
-# data.frame with `name` and `type` columns (matching the form
-# returned by banctable_columns()). Existing columns are skipped.
-# Returns the data.frame of columns that were actually added.
-banctable_add_columns <- function(table,
-                                  columns,
-                                  base = NULL,
-                                  workspace_id = "57832",
-                                  token_name = "BANCTABLE_TOKEN",
-                                  progress = TRUE) {
-  stopifnot(all(c("name", "type") %in% colnames(columns)))
-  if (is.character(base) || is.null(base)) {
-    base <- banctable_base(base_name = base, table = table,
-                           workspace_id = workspace_id,
-                           token_name = token_name)
-  }
-  existing <- banctable_columns(table = table, base = base,
-                                workspace_id = workspace_id,
-                                token_name = token_name,
-                                include_key = FALSE)$name
-  todo <- columns[!columns$name %in% existing, , drop = FALSE]
-  if (nrow(todo) == 0L) {
-    message("[banctable_add_columns] all columns already present")
-    return(invisible(todo))
-  }
-  message(sprintf("[banctable_add_columns] adding %d column(s) to '%s'",
-                  nrow(todo), table))
-  for (i in seq_len(nrow(todo))) {
-    if (isTRUE(progress)) {
-      message(sprintf("  + %-42s [%s]",
-                      todo$name[i], todo$type[i]))
-    }
-    banctable_add_column(table = table,
-                         column_name = todo$name[i],
-                         column_type = todo$type[i],
-                         base = base)
-  }
-  invisible(todo)
-}
-
-# hidden
-# Delete a column from a SeaTable table by column key. Use with
-# extreme caution — this is a destructive schema operation. The
-# column key (not name) is required; pass `banctable_columns(table,
-# include_key = TRUE)` to look it up.
-banctable_delete_column <- function(table,
-                                    column_key,
-                                    base = NULL,
-                                    workspace_id = "57832",
-                                    token_name = "BANCTABLE_TOKEN") {
-  if (is.character(base) || is.null(base)) {
-    base <- banctable_base(base_name = base, table = table,
-                           workspace_id = workspace_id,
-                           token_name = token_name)
-  }
-  res <- base$delete_column(table_name = table, column_key = column_key)
-  invisible(res)
-}
+# banctable_columns(), banctable_add_column(), banctable_add_columns() and
+# banctable_delete_column() now live in R/seatabler.R, wrapping their
+# seatabler::seatable_* equivalents.
 
 # hidden
 # Update SeaTable columns for neurons selected in a Neuroglancer scene.
@@ -1370,36 +1033,8 @@ banctable_annotate <- function(root_ids,
 }
 
 
-# hidden
-banctable_snapshots <- function(token_name = "BANCTABLE_TOKEN",
-                                base_name = "banc_meta",
-                                workspace_id = "57832"){
-  # Build the URL
-  url <- sprintf(
-    "https://cloud.seatable.io/api/v2.1/workspace/%s/dtable/%s/snapshots/",
-    workspace_id, base_name
-  )
-
-  # Set headers
-  token <- Sys.getenv(token_name, unset = NA_character_)
-  headers <- add_headers(
-    accept = "application/json",
-    authorization = paste("Bearer", token)
-  )
-
-  # Perform the GET request
-  response <- httr::GET(url, headers)
-
-  # Given content_text:
-  content_text <- content(response, as = "text", encoding = "UTF-8")
-  json_result <- jsonlite::fromJSON(content_text)
-
-  # To get just the snapshot list as a data.frame:
-  snapshot_list <- json_result$snapshot_list
-
-  # See the first few rows:
-  snapshot_list
-}
+# banctable_snapshots() now lives in R/seatabler.R, wrapping
+# seatabler::seatable_snapshots().
 
 
 

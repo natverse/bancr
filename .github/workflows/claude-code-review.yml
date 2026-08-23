@@ -12,6 +12,18 @@ on:
 
 jobs:
   claude-review:
+    # Opt-in, because this job cannot succeed unless the Claude Code GitHub App
+    # is installed on the natverse org: without it the action exits 1 with
+    # "Claude Code is not installed on this repository", which has made every
+    # pull request red since the workflow was added in May 2026. The
+    # CLAUDE_CODE_OAUTH_TOKEN secret is already set, so installing the App at
+    # https://github.com/apps/claude is the only missing piece.
+    #
+    # To turn this on, set the repository variable ENABLE_CLAUDE_REVIEW to
+    # "true" (Settings > Secrets and variables > Actions > Variables). No code
+    # change needed. Until then the job is skipped rather than failed.
+    if: ${{ vars.ENABLE_CLAUDE_REVIEW == 'true' }}
+
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
