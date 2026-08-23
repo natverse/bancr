@@ -11,6 +11,8 @@
   set a variable called `banctable_TOKEN`, which nothing read.
 * `banctable_move_to_bigdata()` and `banctable_append_rows(bigdata = TRUE)` now
   go through seatabler's REST transport rather than their own httr2 pipelines.
+* bancr now requires seatabler (>= 0.2.0). Earlier seatabler releases lack the
+  generics the `banctable_*` wrappers call.
 
 # bancr 0.3.6 (development)
 
