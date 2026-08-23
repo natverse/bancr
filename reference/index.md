@@ -107,6 +107,8 @@
   : Canonical BANC viewpoints as 4x4 rotation matrices
 - [`banc_scene()`](https://natverse.github.io/bancr/reference/banc_scene.md)
   : Return a sample Neuroglancer scene URL for BANC dataset
+- [`banc_seatable_connection()`](https://natverse.github.io/bancr/reference/banc_seatable_connection.md)
+  : The BANC SeaTable connection
 - [`banc_set_token()`](https://natverse.github.io/bancr/reference/banc_set_token.md)
   : Set the token to be used to authenticate to banc autosegmentation
   resources
@@ -141,6 +143,11 @@
 - [`bancsee()`](https://natverse.github.io/bancr/reference/bancsee.md) :
   Visualise neurons across multiple Drosophila connectomic datasets in
   BANC spelunker
+- [`banctable_columns()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  [`banctable_add_column()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  [`banctable_add_columns()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  [`banctable_delete_column()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  : Read and write columns of a BANC SeaTable table
 - [`banctable_query()`](https://natverse.github.io/bancr/reference/banctable_query.md)
   [`banctable_set_token()`](https://natverse.github.io/bancr/reference/banctable_query.md)
   [`banctable_login()`](https://natverse.github.io/bancr/reference/banctable_query.md)
@@ -149,6 +156,8 @@
   [`franken_meta()`](https://natverse.github.io/bancr/reference/banctable_query.md)
   [`banctable_append_rows()`](https://natverse.github.io/bancr/reference/banctable_query.md)
   : Read and write to the seatable for draft BANC annotations
+- [`banctable_snapshots()`](https://natverse.github.io/bancr/reference/banctable_snapshots.md)
+  : List snapshots of a BANC SeaTable base
 - [`choose_banc()`](https://natverse.github.io/bancr/reference/choose_banc.md)
   [`with_banc()`](https://natverse.github.io/bancr/reference/choose_banc.md)
   : Choose or (temporarily) use the banc autosegmentation

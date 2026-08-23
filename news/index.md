@@ -1,5 +1,28 @@
 # Changelog
 
+## bancr 0.3.7 (development)
+
+- bancr now depends on
+  [seatabler](https://github.com/flyconnectome/seatabler), the generic
+  SeaTable client, and the BANC server configuration lives in one place:
+  [`banc_seatable_connection()`](https://natverse.github.io/bancr/reference/banc_seatable_connection.md).
+  The `banctable_*` names and signatures are unchanged.
+- [`banctable_columns()`](https://natverse.github.io/bancr/reference/banctable_columns.md),
+  [`banctable_add_column()`](https://natverse.github.io/bancr/reference/banctable_columns.md),
+  [`banctable_add_columns()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  and
+  [`banctable_delete_column()`](https://natverse.github.io/bancr/reference/banctable_columns.md)
+  are now exported rather than internal.
+- [`banctable_set_token()`](https://natverse.github.io/bancr/reference/banctable_query.md)
+  no longer appends a duplicate line to `~/.Renviron`, and correctly
+  sets `BANCTABLE_TOKEN` for the current session. It previously set a
+  variable called `banctable_TOKEN`, which nothing read.
+- [`banctable_move_to_bigdata()`](https://natverse.github.io/bancr/reference/banctable_query.md)
+  and `banctable_append_rows(bigdata = TRUE)` now go through seatabler’s
+  REST transport rather than their own httr2 pipelines.
+- bancr now requires seatabler (\>= 0.2.0). Earlier seatabler releases
+  lack the generics the `banctable_*` wrappers call.
+
 ## bancr 0.3.6 (development)
 
 - [`banc_read_neuron_meshes()`](https://natverse.github.io/bancr/reference/banc_read_neuron_meshes.md)

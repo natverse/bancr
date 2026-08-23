@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">bancr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,17 @@
       <small>Source: <a href="https://github.com/natverse/bancr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.7" id="bancr-037-development">bancr 0.3.7 (development)<a class="anchor" aria-label="anchor" href="#bancr-037-development"></a></h2>
+<ul><li>bancr now depends on <a href="https://github.com/flyconnectome/seatabler" class="external-link">seatabler</a>, the generic SeaTable client, and the BANC server configuration lives in one place: <code><a href="../reference/banc_seatable_connection.html">banc_seatable_connection()</a></code>. The <code>banctable_*</code> names and signatures are unchanged.</li>
+<li>
+<code><a href="../reference/banctable_columns.html">banctable_columns()</a></code>, <code><a href="../reference/banctable_columns.html">banctable_add_column()</a></code>, <code><a href="../reference/banctable_columns.html">banctable_add_columns()</a></code> and <code><a href="../reference/banctable_columns.html">banctable_delete_column()</a></code> are now exported rather than internal.</li>
+<li>
+<code><a href="../reference/banctable_query.html">banctable_set_token()</a></code> no longer appends a duplicate line to <code>~/.Renviron</code>, and correctly sets <code>BANCTABLE_TOKEN</code> for the current session. It previously set a variable called <code>banctable_TOKEN</code>, which nothing read.</li>
+<li>
+<code><a href="../reference/banctable_query.html">banctable_move_to_bigdata()</a></code> and <code>banctable_append_rows(bigdata = TRUE)</code> now go through seatabler’s REST transport rather than their own httr2 pipelines.</li>
+<li>bancr now requires seatabler (&gt;= 0.2.0). Earlier seatabler releases lack the generics the <code>banctable_*</code> wrappers call.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.6" id="bancr-036-development">bancr 0.3.6 (development)<a class="anchor" aria-label="anchor" href="#bancr-036-development"></a></h2>
 <ul><li>
