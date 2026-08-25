@@ -1,3 +1,22 @@
+# bancr 0.3.8 (development)
+
+* `banctable_update_rows()` and `banctable_append_rows()` now delegate to
+  seatabler's `seatable_update_rows()` / `seatable_append_rows()`, which arrived
+  in seatabler 0.2.0. Names, signatures and defaults are unchanged, including
+  `append_allowed = FALSE` and `bigdata = FALSE`.
+* Multiple-select columns are now detected from the table schema by seatabler
+  rather than being comma-split by hand in bancr, so a value containing a comma
+  is no longer silently broken into two options.
+* New test covering the SeaTable Python path. bancr's suite previously passed
+  even when seatabler could not reach its Python dependencies, because nothing
+  exercised that path.
+* `banctable_query()` now delegates to seatabler's `seatable_query()`, which
+  applies column types from the table schema as of seatabler 0.2.2. Reads are
+  unchanged: same columns in the same order, same values, and `status` stays
+  character. Five `number` count columns come back as `integer` rather than
+  `numeric`, which has no effect on the values.
+* bancr now requires seatabler (>= 0.2.2) for that column coercion.
+
 # bancr 0.3.7 (development)
 
 * bancr now depends on [seatabler](https://github.com/flyconnectome/seatabler),
