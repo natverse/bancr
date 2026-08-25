@@ -7,11 +7,9 @@
 # code lives in one place. The banctable_* names and signatures are unchanged:
 # there is a lot of analysis code calling them.
 #
-# Not everything has moved. banctable_query() still uses bancr's own row
-# conversion: seatable_query() does not apply column types, so delegating it
-# would change 11 column classes on banc_meta, including status and
-# cell_type_source becoming list columns and _ctime/_mtime losing POSIXct.
-# See flyconnectome/seatabler#9. The row writes moved in bancr 0.3.8.
+# As of bancr 0.3.8 the whole generic surface has moved: queries, row writes,
+# schema, big data and snapshots. seatabler 0.2.2 applies column types from the
+# table schema, so reads match what bancr used to return.
 
 #' The BANC SeaTable connection
 #'

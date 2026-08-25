@@ -10,10 +10,12 @@
 * New test covering the SeaTable Python path. bancr's suite previously passed
   even when seatabler could not reach its Python dependencies, because nothing
   exercised that path.
-* `banctable_query()` still uses bancr's own row conversion. Delegating it would
-  change 11 column types, including `status` and `cell_type_source` becoming
-  list columns and `_ctime`/`_mtime` losing `POSIXct`; see
-  flyconnectome/seatabler#9.
+* `banctable_query()` now delegates to seatabler's `seatable_query()`, which
+  applies column types from the table schema as of seatabler 0.2.2. Reads are
+  unchanged: same columns in the same order, same values, and `status` stays
+  character. Five `number` count columns come back as `integer` rather than
+  `numeric`, which has no effect on the values.
+* bancr now requires seatabler (>= 0.2.2) for that column coercion.
 
 # bancr 0.3.7 (development)
 

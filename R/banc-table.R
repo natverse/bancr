@@ -114,106 +114,16 @@ banctable_query <- function (sql = "SELECT * FROM banc_meta",
                              workspace_id = "57832",
                              retries = 3,
                              table.max = 10000L){
-  if(is.null(ac)) ac <- banctable_login(token_name=token_name)
-  table.max <- 10000L
-  if(limit>table.max){
-    offset <- 0
-    df <- data.frame()
-    while(offset<limit){
-      cat("reading from row: ", offset, "\n")
-      sql.new <- sprintf("%s LIMIT %d OFFSET %d", sql, table.max, offset)
-      tries <- retries
-      bc <- data.frame()
-      while(tries>0&&!nrow(bc)){
-        bc <- banctable_query(sql=sql.new,
-                              limit=FALSE,
-                              base=base,
-                              python=python,
-                              convert=convert,
-                              ac=ac,
-                              token_name=token_name,
-                              workspace_id=workspace_id)
-        tries <- tries - 1
-        if (!nrow(bc) && tries > 0) {
-          # Exponential backoff: 1s, 2s, 4s
-          wait <- 2^(retries - tries - 1)
-          warning(sprintf("  Retry %d/%d for offset %d (waiting %ds)",
-                          retries - tries, retries, offset, wait))
-          Sys.sleep(wait)
-        }
-      }
-      if (!nrow(bc)) {
-        warning(sprintf("All %d retries exhausted at offset %d -- returning %d rows so far",
-                        retries, offset, nrow(df)))
-        if (nrow(df)) return(df) else return(NULL)
-      }
-      df <- rbind(df,bc)
-      offset <- offset+nrow(bc)
-      if(!length(bc)|nrow(bc)<table.max){
-        cat("read rows: ",nrow(df), " read columns:", ncol(df), "\n")
-        return(df)
-      }
-    }
-    cat("read rows: ",nrow(df), " read columns:", ncol(df), "\n")
-    return(df)
-  }
-  if (!requireNamespace("checkmate", quietly = TRUE)) {
-    stop("Package 'checkmate' is required for this function. Please install it with: install.packages('checkmate')")
-  }
-  if (!requireNamespace("stringr", quietly = TRUE)) {
-    stop("Package 'stringr' is required for this function. Please install it with: install.packages('stringr')")
-  }
-  checkmate::assert_character(sql, len = 1, pattern = "select",
-                              ignore.case = T)
-  res = stringr::str_match(sql, stringr::regex("\\s+FROM\\s+[']{0,1}([^, ']+).*",
-                                               ignore_case = T))
-  if (any(is.na(res)[, 2]))
-    stop("Cannot identify a table name in your sql statement!
-")
-  table = res[, 2]
-  if (is.null(base)) {
-    base = try(banctable_base(table = table, workspace_id = workspace_id, token_name = token_name))
-    if (inherits(base, "try-error"))
-      stop("I inferred table_name: ", table, " from your SQL query but couldn't connect to a base with this table!")
-  }
-  else if (is.character(base))
-    base = banctable_base(base_name = base, workspace_id = workspace_id, token_name = token_name)
-  if (!isTRUE(grepl("\\s+limit\\s+\\d+", sql)) && !isFALSE(limit)) {
-    if (!is.finite(limit))
-      limit = .Machine$integer.max
-    sql = paste(sql, "LIMIT", limit)
-  }
-  pyout <- reticulate::py_capture_output(ll <- try(reticulate::py_call(base$query,
-                                                                       sql, convert = convert), silent = T))
-  if (inherits(ll, "try-error")) {
-    is_rate_limit <- grepl("429|too many requests|rate.limit", pyout, ignore.case = TRUE)
-    if (is_rate_limit) {
-      warning("SeaTable API rate limit exceeded (HTTP 429). ",
-              "Check your monthly quota at https://cloud.seatable.io. ",
-              "Python output: ", pyout)
-    } else {
-      warning(paste("No rows returned by banctable", pyout, collapse = "\n"))
-    }
-    return(NULL)
-  }
-  pd = reticulate::import("pandas")
-  reticulate::py_capture_output(pdd <- reticulate::py_call(pd$DataFrame,
-                                                           ll))
-  if (python)
-    pdd
-  else {
-    colinfo = fafbseg::flytable_columns(table, base)
-    df = banctable2df(fafbseg:::pandas2df(pdd, use_arrow = F), tidf = colinfo)
-    fields = fafbseg:::sql2fields(sql)
-    if (length(fields) == 1 && fields == "*") {
-      toorder = intersect(colinfo$name, colnames(df))
-    }
-    else {
-      toorder = intersect(fafbseg:::sql2fields(sql), colnames(df))
-    }
-    rest = setdiff(colnames(df), toorder)
-    df[c(toorder, rest)]
-  }
+  con <- banc_seatable_connection(token_name = token_name,
+                                  workspace_id = workspace_id)
+  # `limit = FALSE` historically meant "do not add a LIMIT clause"; seatabler
+  # expresses that as an infinite limit.
+  if (isFALSE(limit)) limit <- Inf
+  # `ac` is accepted for backwards compatibility and ignored: seatabler logs in
+  # from the connection itself.
+  seatabler::seatable_query(sql = sql, con = con, limit = limit, base = base,
+                            python = python, convert = convert,
+                            chunksize = table.max, retries = retries)
 }
 
 #' @export
@@ -502,56 +412,8 @@ banctable_append_rows <- function (df,
 # builds the payload now.
 
 
-# hidden, modified to enable working with list columns
-banctable2df <- function (df, tidf = NULL) {
-  if (!isTRUE(ncol(df) > 0))
-    return(df)
-  nr = nrow(df)
-  # Convert any columns still stored as Python objects (numpy arrays) to native R.
-  # py_to_r(DataFrame) can leave columns as numpy.ndarray objects; these cause
-  # crashes in downstream flytable_fix_coltypes (e.g. x[is.na(x)] on a Python
-  # array triggers IndexError from wrong-length boolean index).
-  for (i in seq_along(df)) {
-    if (is.environment(df[[i]])) {
-      df[[i]] <- tryCatch(
-        df[[i]]$tolist(),  # auto-converts to R via reticulate
-        error = function(e) rep(NA_character_, nr)
-      )
-    }
-  }
-  listcols = sapply(df, is.list)
-  for (i in which(listcols)) {
-    li = lengths(df[[i]])
-    if (isTRUE(all(li == 1))) {
-      ul = unlist(df[[i]])
-      if (!isTRUE(length(ul) == nr))
-        ul = sapply(ul,paste,collapse=",")
-      else df[[i]] = ul
-    }
-    else if (isTRUE(all(li %in% 0:1))) {
-      tryCatch({
-        df[[i]][!nzchar(df[[i]])] = NA
-      }, error = function(e) {
-        df[[i]] <<- vapply(df[[i]], function(x) {
-          if (is.null(x) || length(x) == 0) NA_character_
-          else {
-            s <- tryCatch(as.character(x)[1], error = function(e2) NA_character_)
-            if (is.na(s) || !nzchar(s)) NA_character_ else s
-          }
-        }, character(1))
-      })
-      df[[i]] = fafbseg:::null2na(df[[i]])
-    }
-    else df[[i]] = sapply(df[[i]],paste,collapse=",")
-  }
-  if (is.null(tidf))
-    df
-  else {
-    if (is.character(tidf))
-      tidf = fafbseg::flytable_columns(tidf)
-    fafbseg:::flytable_fix_coltypes(df, tidf = tidf)
-  }
-}
+# banctable2df() retired: seatabler's st_coerce_df() applies the column types
+# now, from seatabler 0.2.2.
 
 # hidden, helper function to update status column
 banc_update_status <- function(df,
